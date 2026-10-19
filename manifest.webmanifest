@@ -1,0 +1,20 @@
+{
+  "name": "饭搭子 · 今天吃什么",
+  "short_name": "饭搭子",
+  "description": "替选择困难的人一键决定吃 / 买 / 看 / 聊：一桌菜、一周菜单、外卖、零食、水果、饭桌话题与陪伴。",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FBF6EC",
+  "theme_color": "#FBF6EC",
+  "lang": "zh-CN",
+  "icons": [
+    {
+      "src": "./favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
