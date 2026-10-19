@@ -717,8 +717,9 @@
       radial-gradient(circle at 92% 110%, hsl(18 55% 86% / 0.45), transparent 42%);
     background-attachment: fixed;
     /* 页面大小（pageSize.ts）— 默认 1.1（比经典版略大）。
-       注意：仅桌面/Android 走 zoom；iOS 的 zoom 是视觉缩放，会带偏 fixed 定位，
-       由下面 [data-ios] 段关闭并改用根字号缩放。 */
+       全平台（含 iOS）都走 zoom：本应用布局以 px 硬编码为主（text-[12px]、w-[…]），
+       页面大小功能依赖 zoom 的「等比」特性。若在 iOS 上改用根字号缩放，
+       rem 间距与 px 内容比例失衡，顶栏等排满的一行会横向溢出视口（实测复现）。 */
     zoom: var(--page-zoom, 1.1);
   }
   /* 移动端字号兜底：基础文字提升到 16px（高于浏览器默认 14-15px），
@@ -728,19 +729,13 @@
   }
 
   /* === iOS / iPadOS 兼容 ===
-   * 1) CSS zoom 在 iOS Safari 上是视觉缩放：position:fixed 元素（「今日已选」悬浮球）
-   *    的定位基准、vh 计算、视觉视口会一起失准，并和双指手势互相干扰。
-   *    → 关闭 body 的 zoom，改用根字号缩放（复用同一个 --page-zoom，rem 类元素照常放大）。
-   * 2) background-attachment: fixed 在 iOS 上不生效且拖慢滚动 → 退回 scroll。
-   * 3) 输入框字号 < 16px 时 iOS 会在聚焦瞬间强制放大页面，和页面缩放叠加会冲垮布局。
+   * zoom 在 iOS 上保留（等比缩放是本应用布局的前提，见 body 注释），这里只处理 iOS 特有问题：
+   * 1) background-attachment: fixed 在 iOS 上不生效且拖慢滚动 → 退回 scroll。
+   * 2) viewport-fit=cover 下用安全区兜底，避免内容被 Home Indicator 压住。
+   * 3) 输入框字号 < 16px 时 iOS 会在聚焦瞬间强制放大整页（maximum-scale 也拦不住）。
    */
-  html[data-ios="1"] {
-    font-size: calc(17px * var(--page-zoom, 1.1));
-  }
   html[data-ios="1"] body {
-    zoom: 1;
     background-attachment: scroll;
-    /* 安全区兜底：不要让页面内容被 Home Indicator 压住 */
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
   html[data-ios="1"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),

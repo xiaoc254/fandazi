@@ -64,8 +64,9 @@ export function markIOSDevice(): void {
  *  之所以走 data-attr + CSS 而不是直接给 body 设 zoom，是为了在 SSR/初始空 DOM
  *  时也能优雅 no-op；并且方便未来切换实现（rem / transform）。
  *
- *  注意：iOS Safari 上 CSS zoom 会破坏 position:fixed 与视口计算，
- *  因此 body 的 zoom 由 CSS 在 data-ios 下关闭，改用根字号缩放（--page-zoom 仍复用）。 */
+ *  注意：zoom 必须「全平台等比」。本应用布局以 px 硬编码为主，曾尝试在 iOS 上
+ *  关 zoom 改用根字号缩放，结果 rem 间距与 px 内容比例失衡导致横向溢出，已回退。
+ *  data-ios 标记现在只用于 iOS 特有降级（背景 attachment / 安全区 / 输入框 16px）。 */
 export function applyPageSize(id: PageSizeId): void {
   if (typeof document === "undefined") return;
   const meta = getPageSizeMeta(id);
