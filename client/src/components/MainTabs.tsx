@@ -147,8 +147,8 @@ interface Props {
 }
 
 /** 顶部主导航：仅 5 个一级入口。
- *  - 移动端 (<640px)：5 列均分，按钮高 h-12，主标题清晰可读。
- *  - sm+：按钮高 h-14，主标题 + 副标题两行。
+ *  - 移动端 (<640px)：5 列均分，图标在上、完整四字标签在下（竖排，无截断）。
+ *  - sm+：横排 图标 + 主标题，副标题两行，按钮高 h-14。
  *  - 普通文档流，不 sticky / fixed，避免遮挡内容。
  */
 export function MainTabsNav({ active, onChange }: Props) {
@@ -203,19 +203,19 @@ export function MainTabsNav({ active, onChange }: Props) {
                 data-testid={`tab-${t.id}`}
                 aria-current={isActive ? "page" : undefined}
                 title={`${t.label} · ${t.hint}`}
-                className={`group inline-flex h-12 select-none items-center justify-center gap-1.5 overflow-hidden rounded-xl border px-2 text-[14px] font-semibold tracking-tight transition-all hover-elevate active-elevate-2 sm:h-14 sm:px-2.5 ${
+                className={`group flex h-[52px] select-none flex-col items-center justify-center gap-0.5 overflow-hidden rounded-xl border px-1 text-[11.5px] font-semibold tracking-tight transition-all hover-elevate active-elevate-2 sm:h-14 sm:flex-row sm:gap-1.5 sm:px-2.5 sm:text-[14px] ${
                   isActive
                     ? "border-primary/60 bg-primary text-primary-foreground shadow-md shadow-primary/25 scale-[1.02]"
                     : "border-border/70 bg-card/70 text-foreground/90"
                 }`}
               >
                 <Icon
-                  className={`h-4 w-4 flex-shrink-0 sm:h-[17px] sm:w-[17px] ${
+                  className={`h-[18px] w-[18px] flex-shrink-0 sm:h-[17px] sm:w-[17px] ${
                     isActive ? "" : "text-primary"
                   }`}
                 />
-                <span className="flex min-w-0 flex-col items-start leading-tight">
-                  <span className="block truncate whitespace-nowrap">{t.label}</span>
+                <span className="flex min-w-0 flex-col items-center leading-tight sm:items-start">
+                  <span className="block whitespace-nowrap">{t.label}</span>
                   <span
                     className={`hidden truncate whitespace-nowrap text-[10.5px] font-normal sm:block ${
                       isActive ? "text-primary-foreground/85" : "text-muted-foreground"
