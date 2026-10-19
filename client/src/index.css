@@ -743,6 +743,54 @@
   html[data-ios="1"] select {
     font-size: 16px;
   }
+
+  /* === 移动端（<640px）基础适配层 ===
+   * 1) 兜底禁止横向滚动：任何残留的超宽元素只会自己被裁，不会把整页推歪。
+   * 2) 触控：去掉点击 300ms 延迟与双击缩放，点击高亮改为主题色淡染。
+   * 3) 长内容折行（长菜名 / 长 URL），媒体元素不撑破容器。
+   * 4) 横屏时避开刘海与圆角（左右安全区）。
+   */
+  @media (max-width: 640px) {
+    html {
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+      -webkit-tap-highlight-color: hsl(var(--primary) / 0.12);
+    }
+    body {
+      overflow-x: clip;
+      overflow-wrap: break-word;
+      padding-left: env(safe-area-inset-left, 0px);
+      padding-right: env(safe-area-inset-right, 0px);
+    }
+    img,
+    svg,
+    video,
+    canvas,
+    iframe {
+      max-width: 100%;
+    }
+    a,
+    button,
+    [role="button"],
+    input,
+    select,
+    textarea,
+    label {
+      touch-action: manipulation;
+    }
+    /* 横向滚动容器：惯性滚动 + 隐藏原生滚动条，视觉更干净 */
+    .overflow-x-auto,
+    .overflow-auto,
+    .overflow-y-auto {
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .overflow-x-auto::-webkit-scrollbar,
+    .overflow-auto::-webkit-scrollbar,
+    .overflow-y-auto::-webkit-scrollbar {
+      display: none;
+    }
+  }
   ::selection {
     background-color: hsl(var(--primary) / 0.22);
     color: hsl(var(--foreground));

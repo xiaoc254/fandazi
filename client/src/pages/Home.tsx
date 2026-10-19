@@ -1127,7 +1127,7 @@ export default function Home() {
               }}
               data-testid="button-page-size"
               title={`当前字号：${PAGE_SIZES.find((p) => p.id === pageSize)?.label} · 点击循环切换`}
-              className="hidden items-center gap-1.5 rounded-full border border-border/70 bg-card/60 px-3 py-1.5 text-[12.5px] text-foreground/85 hover-elevate active-elevate-2 md:inline-flex"
+              className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-card/60 px-2.5 py-1.5 text-[12.5px] text-foreground/85 hover-elevate active-elevate-2 md:inline-flex"
             >
               <TypeIcon className="h-3.5 w-3.5 text-primary" />
               <span data-testid="text-page-size-label">
@@ -1139,7 +1139,7 @@ export default function Home() {
               aria-label="页面大小"
               data-testid="page-size-segment"
               title="选择页面字号 · 默认推荐"
-              className="inline-flex shrink-0 items-center gap-0.5 overflow-x-auto rounded-full border border-border/70 bg-card/60 p-0.5 text-[11.5px]"
+              className="hidden shrink-0 items-center gap-0.5 overflow-x-auto rounded-full border border-border/70 bg-card/60 p-0.5 text-[11.5px] sm:inline-flex"
             >
               <TypeIcon className="ml-1 mr-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
               {PAGE_SIZES.map((p) => {
