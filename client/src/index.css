@@ -1,0 +1,839 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Warm, home-cooking palette: cream paper, warm clay terracotta accent, soft sage. */
+:root {
+  --button-outline: rgba(60, 30, 10, 0.10);
+  --badge-outline: rgba(60, 30, 10, 0.05);
+  --opaque-button-border-intensity: -8;
+  --elevate-1: rgba(60, 30, 10, 0.04);
+  --elevate-2: rgba(60, 30, 10, 0.09);
+
+  /* Warm cream paper background */
+  --background: 38 47% 95%;
+  --foreground: 24 32% 16%;
+  --border: 32 22% 84%;
+
+  --card: 38 50% 98%;
+  --card-foreground: 24 32% 16%;
+  --card-border: 32 22% 88%;
+
+  --sidebar: 36 35% 92%;
+  --sidebar-foreground: 24 32% 16%;
+  --sidebar-border: 32 22% 84%;
+  --sidebar-primary: 18 65% 47%;
+  --sidebar-primary-foreground: 38 47% 97%;
+  --sidebar-accent: 36 25% 88%;
+  --sidebar-accent-foreground: 24 32% 16%;
+  --sidebar-ring: 18 65% 47%;
+
+  --popover: 38 50% 97%;
+  --popover-foreground: 24 32% 16%;
+  --popover-border: 32 22% 86%;
+
+  /* Terracotta clay primary */
+  --primary: 18 65% 47%;
+  --primary-foreground: 38 47% 97%;
+
+  --secondary: 36 28% 90%;
+  --secondary-foreground: 24 32% 16%;
+
+  --muted: 36 25% 91%;
+  --muted-foreground: 24 14% 38%;
+
+  /* Soft sage accent */
+  --accent: 78 18% 86%;
+  --accent-foreground: 90 30% 22%;
+
+  --destructive: 358 60% 48%;
+  --destructive-foreground: 38 47% 97%;
+
+  --input: 32 22% 78%;
+  --ring: 18 65% 47%;
+
+  --chart-1: 18 65% 47%;
+  --chart-2: 90 30% 38%;
+  --chart-3: 38 70% 52%;
+  --chart-4: 200 28% 45%;
+  --chart-5: 340 38% 52%;
+
+  --font-sans: 'General Sans', ui-sans-serif, system-ui, -apple-system, "Segoe UI", "Helvetica Neue", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-serif: 'Gambarino', Georgia, serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+  --radius: 0.875rem;
+  --shadow-2xs: 0 1px 0 0 hsl(24 32% 16% / 0.03);
+  --shadow-xs: 0 1px 2px 0 hsl(24 32% 16% / 0.04);
+  --shadow-sm: 0 1px 2px 0 hsl(24 32% 16% / 0.05), 0 1px 1px -1px hsl(24 32% 16% / 0.04);
+  --shadow: 0 2px 4px 0 hsl(24 32% 16% / 0.05), 0 1px 2px -1px hsl(24 32% 16% / 0.04);
+  --shadow-md: 0 4px 8px -2px hsl(24 32% 16% / 0.06), 0 2px 4px -2px hsl(24 32% 16% / 0.04);
+  --shadow-lg: 0 12px 24px -8px hsl(24 32% 16% / 0.10), 0 4px 8px -4px hsl(24 32% 16% / 0.06);
+  --shadow-xl: 0 24px 48px -12px hsl(24 32% 16% / 0.14);
+  --shadow-2xl: 0 32px 64px -16px hsl(24 32% 16% / 0.20);
+  --tracking-normal: 0em;
+  --spacing: 0.25rem;
+
+  --sidebar-primary-border: hsl(var(--sidebar-primary) / 0.55);
+
+  --sidebar-accent-border: hsl(var(--sidebar-accent) / 0.55);
+
+  --primary-border: hsl(var(--primary) / 0.55);
+
+  --secondary-border: hsl(var(--secondary) / 0.55);
+
+  --muted-border: hsl(var(--muted) / 0.55);
+
+  --accent-border: hsl(var(--accent) / 0.55);
+
+  --destructive-border: hsl(var(--destructive) / 0.55);
+}
+
+/* === v2: 整站主题（data-theme） === */
+/* 默认 :root 是 warm 主题。data-theme=warm 等价于不设。 */
+:root[data-theme="fresh"] {
+  --background: 210 36% 97%;
+  --foreground: 218 35% 14%;
+  --border: 210 22% 88%;
+  --card: 210 40% 99%;
+  --card-foreground: 218 35% 14%;
+  --card-border: 210 22% 90%;
+  --primary: 213 88% 52%;
+  --primary-foreground: 210 36% 98%;
+  --secondary: 210 28% 92%;
+  --secondary-foreground: 218 35% 14%;
+  --muted: 210 22% 92%;
+  --muted-foreground: 218 14% 38%;
+  --accent: 198 60% 90%;
+  --accent-foreground: 200 50% 22%;
+  --input: 210 22% 80%;
+  --ring: 213 88% 52%;
+  --sidebar: 210 32% 95%;
+  --sidebar-foreground: 218 35% 14%;
+  --sidebar-border: 210 22% 88%;
+  --sidebar-primary: 213 88% 52%;
+  --sidebar-primary-foreground: 210 36% 98%;
+  --sidebar-accent: 210 28% 90%;
+  --sidebar-accent-foreground: 218 35% 14%;
+  --sidebar-ring: 213 88% 52%;
+  --popover: 210 40% 98%;
+  --popover-foreground: 218 35% 14%;
+  --popover-border: 210 22% 88%;
+  --destructive: 358 60% 48%;
+  --destructive-foreground: 210 36% 98%;
+}
+:root[data-theme="fresh"] body {
+  background-image:
+    radial-gradient(circle at 12% 8%, hsl(210 80% 92% / 0.65), transparent 38%),
+    radial-gradient(circle at 92% 110%, hsl(195 70% 88% / 0.55), transparent 42%);
+}
+:root[data-theme="cream"] {
+  --background: 36 50% 95%;
+  --foreground: 26 32% 18%;
+  --border: 32 24% 84%;
+  --card: 36 55% 98%;
+  --card-foreground: 26 32% 18%;
+  --card-border: 32 24% 88%;
+  --primary: 30 70% 48%;
+  --primary-foreground: 36 50% 98%;
+  --secondary: 34 28% 90%;
+  --secondary-foreground: 26 32% 18%;
+  --muted: 34 26% 91%;
+  --muted-foreground: 26 14% 38%;
+  --accent: 38 50% 88%;
+  --accent-foreground: 26 50% 22%;
+  --input: 32 24% 80%;
+  --ring: 30 70% 48%;
+  --sidebar: 36 35% 92%;
+  --sidebar-foreground: 26 32% 18%;
+  --sidebar-border: 32 24% 84%;
+  --sidebar-primary: 30 70% 48%;
+  --sidebar-primary-foreground: 36 50% 98%;
+  --sidebar-accent: 36 28% 88%;
+  --sidebar-accent-foreground: 26 32% 18%;
+  --sidebar-ring: 30 70% 48%;
+  --popover: 36 50% 97%;
+  --popover-foreground: 26 32% 18%;
+  --popover-border: 32 24% 86%;
+}
+:root[data-theme="cream"] body {
+  background-image:
+    radial-gradient(circle at 12% 8%, hsl(36 60% 88% / 0.55), transparent 38%),
+    radial-gradient(circle at 92% 110%, hsl(28 60% 88% / 0.45), transparent 42%);
+}
+:root[data-theme="mint"] {
+  --background: 138 36% 96%;
+  --foreground: 158 35% 14%;
+  --border: 138 22% 86%;
+  --card: 138 40% 98%;
+  --card-foreground: 158 35% 14%;
+  --card-border: 138 22% 88%;
+  --primary: 154 56% 38%;
+  --primary-foreground: 138 36% 97%;
+  --secondary: 138 26% 90%;
+  --secondary-foreground: 158 35% 14%;
+  --muted: 138 22% 92%;
+  --muted-foreground: 158 14% 36%;
+  --accent: 130 36% 88%;
+  --accent-foreground: 150 50% 22%;
+  --input: 138 22% 80%;
+  --ring: 154 56% 38%;
+  --sidebar: 138 32% 94%;
+  --sidebar-foreground: 158 35% 14%;
+  --sidebar-border: 138 22% 86%;
+  --sidebar-primary: 154 56% 38%;
+  --sidebar-primary-foreground: 138 36% 97%;
+  --sidebar-accent: 138 26% 88%;
+  --sidebar-accent-foreground: 158 35% 14%;
+  --sidebar-ring: 154 56% 38%;
+  --popover: 138 40% 97%;
+  --popover-foreground: 158 35% 14%;
+  --popover-border: 138 22% 86%;
+}
+:root[data-theme="mint"] body {
+  background-image:
+    radial-gradient(circle at 12% 8%, hsl(150 60% 88% / 0.6), transparent 38%),
+    radial-gradient(circle at 92% 110%, hsl(170 50% 86% / 0.45), transparent 42%);
+}
+:root[data-theme="midnight"] {
+  --background: 220 18% 9%;
+  --foreground: 210 30% 92%;
+  --border: 220 14% 22%;
+  --card: 220 18% 13%;
+  --card-foreground: 210 30% 92%;
+  --card-border: 220 14% 20%;
+  --primary: 213 90% 64%;
+  --primary-foreground: 220 18% 9%;
+  --secondary: 220 14% 22%;
+  --secondary-foreground: 210 30% 92%;
+  --muted: 220 14% 22%;
+  --muted-foreground: 210 12% 65%;
+  --accent: 200 30% 22%;
+  --accent-foreground: 210 30% 86%;
+  --input: 220 14% 30%;
+  --ring: 213 90% 64%;
+  --sidebar: 220 18% 12%;
+  --sidebar-foreground: 210 30% 92%;
+  --sidebar-border: 220 14% 22%;
+  --sidebar-primary: 213 90% 64%;
+  --sidebar-primary-foreground: 220 18% 9%;
+  --sidebar-accent: 220 14% 20%;
+  --sidebar-accent-foreground: 210 30% 92%;
+  --sidebar-ring: 213 90% 64%;
+  --popover: 220 18% 13%;
+  --popover-foreground: 210 30% 92%;
+  --popover-border: 220 14% 22%;
+  --destructive: 358 65% 60%;
+  --destructive-foreground: 220 18% 9%;
+  --elevate-1: rgba(255, 255, 255, 0.05);
+  --elevate-2: rgba(255, 255, 255, 0.10);
+}
+:root[data-theme="midnight"] body {
+  background-image:
+    radial-gradient(circle at 12% 8%, hsl(220 30% 18% / 0.7), transparent 38%),
+    radial-gradient(circle at 92% 110%, hsl(218 40% 16% / 0.5), transparent 42%);
+}
+:root[data-theme="vibrant"] {
+  --background: 12 60% 97%;
+  --foreground: 348 35% 18%;
+  --border: 12 28% 88%;
+  --card: 12 60% 99%;
+  --card-foreground: 348 35% 18%;
+  --card-border: 12 28% 90%;
+  --primary: 354 86% 58%;
+  --primary-foreground: 12 60% 98%;
+  --secondary: 12 30% 92%;
+  --secondary-foreground: 348 35% 18%;
+  --muted: 12 28% 93%;
+  --muted-foreground: 348 14% 38%;
+  --accent: 28 80% 88%;
+  --accent-foreground: 18 50% 26%;
+  --input: 12 28% 80%;
+  --ring: 354 86% 58%;
+  --sidebar: 12 50% 95%;
+  --sidebar-foreground: 348 35% 18%;
+  --sidebar-border: 12 28% 88%;
+  --sidebar-primary: 354 86% 58%;
+  --sidebar-primary-foreground: 12 60% 98%;
+  --sidebar-accent: 12 30% 90%;
+  --sidebar-accent-foreground: 348 35% 18%;
+  --sidebar-ring: 354 86% 58%;
+  --popover: 12 60% 98%;
+  --popover-foreground: 348 35% 18%;
+  --popover-border: 12 28% 88%;
+}
+:root[data-theme="vibrant"] body {
+  background-image:
+    radial-gradient(circle at 12% 8%, hsl(28 80% 88% / 0.65), transparent 38%),
+    radial-gradient(circle at 92% 110%, hsl(354 65% 86% / 0.55), transparent 42%);
+}
+:root[data-theme="minimal"] {
+  --background: 0 0% 99%;
+  --foreground: 0 0% 12%;
+  --border: 0 0% 88%;
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 12%;
+  --card-border: 0 0% 90%;
+  --primary: 0 0% 12%;
+  --primary-foreground: 0 0% 99%;
+  --secondary: 0 0% 94%;
+  --secondary-foreground: 0 0% 12%;
+  --muted: 0 0% 94%;
+  --muted-foreground: 0 0% 36%;
+  --accent: 0 0% 92%;
+  --accent-foreground: 0 0% 12%;
+  --input: 0 0% 80%;
+  --ring: 0 0% 12%;
+  --sidebar: 0 0% 96%;
+  --sidebar-foreground: 0 0% 12%;
+  --sidebar-border: 0 0% 88%;
+  --sidebar-primary: 0 0% 12%;
+  --sidebar-primary-foreground: 0 0% 99%;
+  --sidebar-accent: 0 0% 92%;
+  --sidebar-accent-foreground: 0 0% 12%;
+  --sidebar-ring: 0 0% 12%;
+  --popover: 0 0% 99%;
+  --popover-foreground: 0 0% 12%;
+  --popover-border: 0 0% 88%;
+}
+:root[data-theme="minimal"] body {
+  background-image: none;
+}
+
+/* === 餐次主题：通过 data-meal=breakfast/lunch/dinner 与当前 data-theme 组合覆盖。 ===
+ *  设计：每个主题都为早/午/晚定义不同的 --primary / --accent / --background 与背景渐变，
+ *  让"主题 × 餐次"得到 7×3 = 21 种明显不同的视觉，而不再固定一组暖色。
+ */
+
+/* 默认（warm 经典）— 早餐：晨光鹅黄 */
+:root[data-meal="breakfast"] {
+  --primary: 36 75% 56%;
+  --ring: 36 75% 56%;
+  --accent: 198 55% 88%;
+  --accent-foreground: 200 50% 28%;
+  --background: 42 65% 96%;
+}
+:root[data-meal="breakfast"] body {
+  background-image:
+    radial-gradient(circle at 12% 8%, hsl(45 80% 86% / 0.7), transparent 40%),
+    radial-gradient(circle at 92% 110%, hsl(195 60% 84% / 0.55), transparent 42%);
+}
+/* 默认（warm 经典）— 午餐：日正暖橙 */
+:root[data-meal="lunch"] {
+  --primary: 22 80% 52%;
+  --ring: 22 80% 52%;
+  --accent: 60 30% 86%;
+  --accent-foreground: 26 50% 26%;
+  --background: 36 55% 95%;
+}
+:root[data-meal="lunch"] body {
+  background-image:
+    radial-gradient(circle at 14% 6%, hsl(36 80% 86% / 0.65), transparent 40%),
+    radial-gradient(circle at 92% 110%, hsl(20 65% 82% / 0.55), transparent 42%);
+}
+/* 默认（warm 经典）— 晚餐：暮色陶红 */
+:root[data-meal="dinner"] {
+  --primary: 14 60% 42%;
+  --ring: 14 60% 42%;
+  --accent: 18 25% 84%;
+  --accent-foreground: 18 50% 22%;
+  --background: 24 30% 92%;
+}
+:root[data-meal="dinner"] body {
+  background-image:
+    radial-gradient(circle at 12% 6%, hsl(28 60% 80% / 0.65), transparent 40%),
+    radial-gradient(circle at 88% 110%, hsl(14 50% 76% / 0.55), transparent 42%);
+}
+
+/* === fresh 蓝白 × 餐次 === */
+:root[data-theme="fresh"][data-meal="breakfast"] {
+  --primary: 198 88% 50%;
+  --ring: 198 88% 50%;
+  --accent: 50 80% 88%;
+  --accent-foreground: 36 60% 22%;
+  --background: 200 55% 97%;
+}
+:root[data-theme="fresh"][data-meal="breakfast"] body {
+  background-image:
+    radial-gradient(circle at 10% 8%, hsl(50 90% 86% / 0.65), transparent 38%),
+    radial-gradient(circle at 92% 108%, hsl(198 80% 86% / 0.6), transparent 42%);
+}
+:root[data-theme="fresh"][data-meal="lunch"] {
+  --primary: 213 88% 50%;
+  --ring: 213 88% 50%;
+  --accent: 200 70% 86%;
+  --accent-foreground: 210 50% 22%;
+  --background: 210 45% 97%;
+}
+:root[data-theme="fresh"][data-meal="lunch"] body {
+  background-image:
+    radial-gradient(circle at 14% 6%, hsl(210 90% 88% / 0.65), transparent 40%),
+    radial-gradient(circle at 92% 110%, hsl(195 70% 84% / 0.55), transparent 42%);
+}
+:root[data-theme="fresh"][data-meal="dinner"] {
+  --primary: 232 70% 52%;
+  --ring: 232 70% 52%;
+  --accent: 230 35% 84%;
+  --accent-foreground: 232 60% 22%;
+  --background: 220 35% 94%;
+}
+:root[data-theme="fresh"][data-meal="dinner"] body {
+  background-image:
+    radial-gradient(circle at 10% 6%, hsl(230 60% 82% / 0.7), transparent 40%),
+    radial-gradient(circle at 92% 110%, hsl(258 60% 82% / 0.5), transparent 42%);
+}
+
+/* === cream 奶油 × 餐次 === */
+:root[data-theme="cream"][data-meal="breakfast"] {
+  --primary: 36 80% 52%;
+  --ring: 36 80% 52%;
+  --accent: 38 60% 88%;
+  --accent-foreground: 28 50% 24%;
+  --background: 38 60% 96%;
+}
+:root[data-theme="cream"][data-meal="breakfast"] body {
+  background-image:
+    radial-gradient(circle at 12% 8%, hsl(45 80% 86% / 0.7), transparent 40%),
+    radial-gradient(circle at 92% 110%, hsl(28 70% 86% / 0.55), transparent 42%);
+}
+:root[data-theme="cream"][data-meal="lunch"] {
+  --primary: 28 78% 50%;
+  --ring: 28 78% 50%;
+  --accent: 36 50% 86%;
+  --accent-foreground: 26 50% 22%;
+  --background: 32 50% 95%;
+}
+:root[data-theme="cream"][data-meal="lunch"] body {
+  background-image:
+    radial-gradient(circle at 14% 6%, hsl(32 80% 84% / 0.65), transparent 40%),
+    radial-gradient(circle at 92% 110%, hsl(20 70% 82% / 0.5), transparent 42%);
+}
+:root[data-theme="cream"][data-meal="dinner"] {
+  --primary: 18 60% 42%;
+  --ring: 18 60% 42%;
+  --accent: 16 30% 82%;
+  --accent-foreground: 18 50% 22%;
+  --background: 24 32% 92%;
+}
+:root[data-theme="cream"][data-meal="dinner"] body {
+  background-image:
+    radial-gradient(circle at 12% 6%, hsl(24 50% 78% / 0.7), transparent 40%),
+    radial-gradient(circle at 88% 110%, hsl(10 45% 76% / 0.55), transparent 42%);
+}
+
+/* === mint 薄荷 × 餐次 === */
+:root[data-theme="mint"][data-meal="breakfast"] {
+  --primary: 154 60% 38%;
+  --ring: 154 60% 38%;
+  --accent: 50 65% 88%;
+  --accent-foreground: 50 50% 22%;
+  --background: 132 45% 96%;
+}
+:root[data-theme="mint"][data-meal="breakfast"] body {
+  background-image:
+    radial-gradient(circle at 12% 8%, hsl(50 80% 86% / 0.65), transparent 40%),
+    radial-gradient(circle at 92% 110%, hsl(150 70% 84% / 0.55), transparent 42%);
+}
+:root[data-theme="mint"][data-meal="lunch"] {
+  --primary: 150 60% 36%;
+  --ring: 150 60% 36%;
+  --accent: 80 40% 84%;
+  --accent-foreground: 90 40% 22%;
+  --background: 130 40% 95%;
+}
+:root[data-theme="mint"][data-meal="lunch"] body {
+  background-image:
+    radial-gradient(circle at 14% 6%, hsl(140 70% 84% / 0.65), transparent 40%),
+    radial-gradient(circle at 92% 110%, hsl(80 65% 84% / 0.55), transparent 42%);
+}
+:root[data-theme="mint"][data-meal="dinner"] {
+  --primary: 170 50% 30%;
+  --ring: 170 50% 30%;
+  --accent: 200 32% 80%;
+  --accent-foreground: 210 50% 22%;
+  --background: 180 28% 92%;
+}
+:root[data-theme="mint"][data-meal="dinner"] body {
+  background-image:
+    radial-gradient(circle at 12% 6%, hsl(180 55% 80% / 0.65), transparent 40%),
+    radial-gradient(circle at 88% 110%, hsl(220 45% 80% / 0.55), transparent 42%);
+}
+
+/* === midnight 夜宵 × 餐次 === */
+:root[data-theme="midnight"][data-meal="breakfast"] {
+  --primary: 38 90% 60%;
+  --ring: 38 90% 60%;
+  --accent: 30 30% 22%;
+  --accent-foreground: 38 60% 86%;
+  --background: 220 20% 11%;
+}
+:root[data-theme="midnight"][data-meal="breakfast"] body {
+  background-image:
+    radial-gradient(circle at 12% 8%, hsl(38 60% 28% / 0.7), transparent 40%),
+    radial-gradient(circle at 92% 110%, hsl(220 35% 18% / 0.55), transparent 42%);
+}
+:root[data-theme="midnight"][data-meal="lunch"] {
+  --primary: 213 90% 64%;
+  --ring: 213 90% 64%;
+  --accent: 200 30% 22%;
+  --accent-foreground: 210 30% 86%;
+  --background: 218 22% 10%;
+}
+:root[data-theme="midnight"][data-meal="lunch"] body {
+  background-image:
+    radial-gradient(circle at 14% 6%, hsl(220 50% 22% / 0.7), transparent 40%),
+    radial-gradient(circle at 92% 110%, hsl(200 50% 22% / 0.55), transparent 42%);
+}
+:root[data-theme="midnight"][data-meal="dinner"] {
+  --primary: 280 65% 65%;
+  --ring: 280 65% 65%;
+  --accent: 260 20% 22%;
+  --accent-foreground: 260 30% 86%;
+  --background: 250 22% 10%;
+}
+:root[data-theme="midnight"][data-meal="dinner"] body {
+  background-image:
+    radial-gradient(circle at 12% 6%, hsl(280 40% 22% / 0.7), transparent 40%),
+    radial-gradient(circle at 88% 110%, hsl(220 35% 18% / 0.55), transparent 42%);
+}
+
+/* === vibrant 粉橘 × 餐次 === */
+:root[data-theme="vibrant"][data-meal="breakfast"] {
+  --primary: 24 86% 56%;
+  --ring: 24 86% 56%;
+  --accent: 38 80% 88%;
+  --accent-foreground: 24 60% 24%;
+  --background: 30 60% 97%;
+}
+:root[data-theme="vibrant"][data-meal="breakfast"] body {
+  background-image:
+    radial-gradient(circle at 12% 8%, hsl(38 90% 86% / 0.7), transparent 40%),
+    radial-gradient(circle at 92% 110%, hsl(354 65% 86% / 0.5), transparent 42%);
+}
+:root[data-theme="vibrant"][data-meal="lunch"] {
+  --primary: 354 86% 58%;
+  --ring: 354 86% 58%;
+  --accent: 22 80% 86%;
+  --accent-foreground: 18 50% 24%;
+  --background: 12 60% 97%;
+}
+:root[data-theme="vibrant"][data-meal="lunch"] body {
+  background-image:
+    radial-gradient(circle at 14% 6%, hsl(28 80% 86% / 0.7), transparent 40%),
+    radial-gradient(circle at 92% 110%, hsl(354 80% 84% / 0.55), transparent 42%);
+}
+:root[data-theme="vibrant"][data-meal="dinner"] {
+  --primary: 330 65% 50%;
+  --ring: 330 65% 50%;
+  --accent: 320 30% 84%;
+  --accent-foreground: 320 50% 22%;
+  --background: 340 30% 95%;
+}
+:root[data-theme="vibrant"][data-meal="dinner"] body {
+  background-image:
+    radial-gradient(circle at 12% 6%, hsl(330 60% 82% / 0.7), transparent 40%),
+    radial-gradient(circle at 88% 110%, hsl(280 50% 80% / 0.5), transparent 42%);
+}
+
+/* === minimal 黑白 × 餐次 — 用浅灰阶 + 微弱色调 === */
+:root[data-theme="minimal"][data-meal="breakfast"] {
+  --primary: 0 0% 18%;
+  --ring: 0 0% 18%;
+  --accent: 50 30% 92%;
+  --accent-foreground: 0 0% 12%;
+  --background: 40 18% 98%;
+}
+:root[data-theme="minimal"][data-meal="breakfast"] body {
+  background-image:
+    radial-gradient(circle at 12% 8%, hsl(50 40% 92% / 0.6), transparent 40%),
+    radial-gradient(circle at 92% 110%, hsl(0 0% 94% / 0.55), transparent 42%);
+}
+:root[data-theme="minimal"][data-meal="lunch"] {
+  --primary: 0 0% 12%;
+  --ring: 0 0% 12%;
+  --accent: 0 0% 92%;
+  --accent-foreground: 0 0% 12%;
+  --background: 0 0% 99%;
+}
+:root[data-theme="minimal"][data-meal="lunch"] body {
+  background-image:
+    radial-gradient(circle at 14% 6%, hsl(0 0% 94% / 0.6), transparent 40%),
+    radial-gradient(circle at 92% 110%, hsl(0 0% 90% / 0.5), transparent 42%);
+}
+:root[data-theme="minimal"][data-meal="dinner"] {
+  --primary: 0 0% 6%;
+  --ring: 0 0% 6%;
+  --accent: 220 15% 88%;
+  --accent-foreground: 0 0% 12%;
+  --background: 220 14% 96%;
+}
+:root[data-theme="minimal"][data-meal="dinner"] body {
+  background-image:
+    radial-gradient(circle at 12% 6%, hsl(220 18% 90% / 0.65), transparent 40%),
+    radial-gradient(circle at 88% 110%, hsl(0 0% 88% / 0.55), transparent 42%);
+}
+
+/* === warm 经典暖橘 × 餐次（与默认相同，但显式声明优先级覆盖） === */
+:root[data-theme="warm"][data-meal="breakfast"] {
+  --primary: 36 75% 56%;
+  --ring: 36 75% 56%;
+  --accent: 198 55% 88%;
+  --accent-foreground: 200 50% 28%;
+  --background: 42 65% 96%;
+}
+:root[data-theme="warm"][data-meal="breakfast"] body {
+  background-image:
+    radial-gradient(circle at 12% 8%, hsl(45 80% 86% / 0.7), transparent 40%),
+    radial-gradient(circle at 92% 110%, hsl(195 60% 84% / 0.55), transparent 42%);
+}
+:root[data-theme="warm"][data-meal="lunch"] {
+  --primary: 22 80% 52%;
+  --ring: 22 80% 52%;
+  --accent: 60 30% 86%;
+  --accent-foreground: 26 50% 26%;
+  --background: 36 55% 95%;
+}
+:root[data-theme="warm"][data-meal="lunch"] body {
+  background-image:
+    radial-gradient(circle at 14% 6%, hsl(36 80% 86% / 0.65), transparent 40%),
+    radial-gradient(circle at 92% 110%, hsl(20 65% 82% / 0.55), transparent 42%);
+}
+:root[data-theme="warm"][data-meal="dinner"] {
+  --primary: 14 60% 42%;
+  --ring: 14 60% 42%;
+  --accent: 18 25% 84%;
+  --accent-foreground: 18 50% 22%;
+  --background: 24 30% 92%;
+}
+:root[data-theme="warm"][data-meal="dinner"] body {
+  background-image:
+    radial-gradient(circle at 12% 6%, hsl(28 60% 80% / 0.65), transparent 40%),
+    radial-gradient(circle at 88% 110%, hsl(14 50% 76% / 0.55), transparent 42%);
+}
+
+.dark {
+  --button-outline: rgba(255, 255, 255, 0.10);
+  --badge-outline: rgba(255, 255, 255, 0.05);
+  --opaque-button-border-intensity: 9;
+  --elevate-1: rgba(255, 255, 255, 0.05);
+  --elevate-2: rgba(255, 255, 255, 0.10);
+
+  --background: 24 18% 10%;
+  --foreground: 38 30% 92%;
+  --border: 24 12% 22%;
+  --card: 24 18% 13%;
+  --card-foreground: 38 30% 92%;
+  --card-border: 24 12% 20%;
+  --sidebar: 24 18% 12%;
+  --sidebar-foreground: 38 30% 92%;
+  --sidebar-border: 24 12% 22%;
+  --sidebar-primary: 18 65% 58%;
+  --sidebar-primary-foreground: 24 18% 10%;
+  --sidebar-accent: 24 12% 20%;
+  --sidebar-accent-foreground: 38 30% 92%;
+  --sidebar-ring: 18 65% 58%;
+  --popover: 24 18% 13%;
+  --popover-foreground: 38 30% 92%;
+  --popover-border: 24 12% 22%;
+  --primary: 18 70% 60%;
+  --primary-foreground: 24 18% 10%;
+  --secondary: 24 12% 22%;
+  --secondary-foreground: 38 30% 92%;
+  --muted: 24 12% 22%;
+  --muted-foreground: 38 12% 65%;
+  --accent: 90 14% 24%;
+  --accent-foreground: 78 28% 86%;
+  --destructive: 358 65% 60%;
+  --destructive-foreground: 24 18% 10%;
+  --input: 24 12% 30%;
+  --ring: 18 70% 60%;
+  --chart-1: 18 70% 60%;
+  --chart-2: 90 30% 55%;
+  --chart-3: 38 70% 60%;
+  --chart-4: 200 35% 60%;
+  --chart-5: 340 45% 65%;
+
+  --sidebar-primary-border: hsl(var(--sidebar-primary) / 0.55);
+  --sidebar-accent-border: hsl(var(--sidebar-accent) / 0.55);
+  --primary-border: hsl(var(--primary) / 0.55);
+  --secondary-border: hsl(var(--secondary) / 0.55);
+  --muted-border: hsl(var(--muted) / 0.55);
+  --accent-border: hsl(var(--accent) / 0.55);
+  --destructive-border: hsl(var(--destructive) / 0.55);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    overflow-x: hidden;
+    /* Firefox / Safari 不支持 zoom 时，用 html 字号承担页面缩放 */
+    font-size: calc(16px * var(--page-zoom, 1.1));
+  }
+  html, body {
+    @apply font-sans antialiased bg-background text-foreground;
+    font-feature-settings: "ss01", "cv11";
+    max-width: 100%;
+  }
+  body {
+    overflow-x: hidden;
+    background-image:
+      radial-gradient(circle at 12% 8%, hsl(38 60% 88% / 0.55), transparent 38%),
+      radial-gradient(circle at 92% 110%, hsl(18 55% 86% / 0.45), transparent 42%);
+    background-attachment: scroll;
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+  }
+  @supports (zoom: 1) {
+    html { font-size: 16px; }
+    body { zoom: var(--page-zoom, 1.1); }
+  }
+  /* 移动端字号兜底：基础文字提升到 16px（高于浏览器默认 14-15px） */
+  @media (max-width: 640px) {
+    html { font-size: calc(17px * var(--page-zoom, 1.1)); }
+  }
+  @supports (zoom: 1) {
+    @media (max-width: 640px) {
+      html { font-size: 17px; }
+    }
+  }
+  @media (min-width: 641px) {
+    body { background-attachment: fixed; }
+  }
+  input, select, textarea {
+    font-size: max(16px, 1em);
+  }
+  ::selection {
+    background-color: hsl(var(--primary) / 0.22);
+    color: hsl(var(--foreground));
+  }
+}
+
+@layer components {
+  .grain {
+    position: relative;
+  }
+  .grain::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border-radius: inherit;
+    opacity: 0.45;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.16  0 0 0 0 0.10  0 0 0 0 0.06  0 0 0 0.06 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  }
+  :root[data-theme="midnight"] .grain::after,
+  .dark .grain::after {
+    mix-blend-mode: overlay;
+    opacity: 0.18;
+  }
+}
+
+@layer utilities {
+  input[type='search']::-webkit-search-cancel-button {
+    @apply hidden;
+  }
+  [contenteditable][data-placeholder]:empty::before {
+    content: attr(data-placeholder);
+    color: hsl(var(--muted-foreground));
+    pointer-events: none;
+  }
+  .no-default-hover-elevate {}
+  .no-default-active-elevate {}
+
+  .toggle-elevate::before,
+  .toggle-elevate-2::before {
+    content: '';
+    pointer-events: none;
+    position: absolute;
+    inset: 0px;
+    border-radius: inherit;
+    z-index: -1;
+  }
+  .toggle-elevate.toggle-elevated::before {
+    background-color: var(--elevate-2);
+  }
+  .border.toggle-elevate::before { inset: -1px; }
+
+  .hover-elevate:not(.no-default-hover-elevate),
+  .active-elevate:not(.no-default-active-elevate),
+  .hover-elevate-2:not(.no-default-hover-elevate),
+  .active-elevate-2:not(.no-default-active-elevate) {
+    position: relative;
+    z-index: 0;
+  }
+  .hover-elevate:not(.no-default-hover-elevate)::after,
+  .active-elevate:not(.no-default-active-elevate)::after,
+  .hover-elevate-2:not(.no-default-hover-elevate)::after,
+  .active-elevate-2:not(.no-default-active-elevate)::after {
+    content: '';
+    pointer-events: none;
+    position: absolute;
+    inset: 0px;
+    border-radius: inherit;
+    z-index: 999;
+  }
+  .hover-elevate:hover:not(.no-default-hover-elevate)::after,
+  .active-elevate:active:not(.no-default-active-elevate)::after {
+    background-color: var(--elevate-1);
+  }
+  .hover-elevate-2:hover:not(.no-default-hover-elevate)::after,
+  .active-elevate-2:active:not(.no-default-active-elevate)::after {
+    background-color: var(--elevate-2);
+  }
+  .border.hover-elevate:not(.no-hover-interaction-elevate)::after,
+  .border.active-elevate:not(.no-active-interaction-elevate)::after,
+  .border.hover-elevate-2:not(.no-hover-interaction-elevate)::after,
+  .border.active-elevate-2:not(.no-active-interaction-elevate)::after,
+  .border.hover-elevate:not(.no-hover-interaction-elevate)::after {
+    inset: -1px;
+  }
+
+  /* Custom utilities */
+  .font-display {
+    font-family: var(--font-serif);
+    letter-spacing: -0.01em;
+  }
+  .num {
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  @keyframes shake-rise {
+    0% { transform: translateY(8px) rotate(-2deg); opacity: 0; }
+    50% { transform: translateY(-3px) rotate(1deg); opacity: 1; }
+    100% { transform: translateY(0) rotate(0); opacity: 1; }
+  }
+  .animate-rise {
+    animation: shake-rise 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  @keyframes wiggle {
+    0%, 100% { transform: rotate(0); }
+    25% { transform: rotate(-6deg); }
+    75% { transform: rotate(6deg); }
+  }
+  .group:active .group-active\:wiggle,
+  .animate-wiggle {
+    animation: wiggle 360ms ease-in-out;
+  }
+  /* v11 主导航：5 个一级入口，各端均按 --tab-cols 等分（移动端字号略小，仍可读） */
+  .main-tabs-row {
+    display: grid;
+    gap: 0.4rem;
+    grid-template-columns: repeat(var(--tab-cols, 5), minmax(0, 1fr));
+  }
+  @media (min-width: 640px) {
+    .main-tabs-row {
+      gap: 0.5rem;
+      grid-template-columns: repeat(var(--tab-cols, 5), minmax(0, 1fr));
+    }
+  }
+}

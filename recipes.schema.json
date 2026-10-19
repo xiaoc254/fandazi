@@ -1,0 +1,215 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/your-org/caipu/blob/master/recipes.schema.json",
+  "title": "Recipe",
+  "description": "「今天吃什么」单条菜谱数据结构。对应 client/src/data/recipes.ts 中的 Recipe 接口，可用于校验社区贡献。",
+  "type": "object",
+  "required": [
+    "id",
+    "name",
+    "course",
+    "cuisine",
+    "difficulty",
+    "timeMinutes",
+    "tastes",
+    "contains",
+    "steps",
+    "reason",
+    "serves",
+    "ingredients"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "唯一标识。建议使用英文 kebab-case，例如 `tomato-egg`、`mapo-tofu`。同一仓库内不可重复。",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+      "minLength": 2,
+      "maxLength": 60
+    },
+    "name": {
+      "type": "string",
+      "description": "菜品中文名称，2-12 字。例如「番茄炒蛋」。",
+      "minLength": 1,
+      "maxLength": 24
+    },
+    "course": {
+      "type": "string",
+      "description": "菜品分类：main 主菜 / soup 汤 / veggie 素菜 / staple 主食。",
+      "enum": ["main", "soup", "veggie", "staple"]
+    },
+    "cuisine": {
+      "type": "string",
+      "description": "菜系标签。「家常」用于不强属于任一菜系的常见菜。",
+      "enum": ["川菜", "粤菜", "江浙", "鲁菜", "西北", "东北", "家常"]
+    },
+    "difficulty": {
+      "type": "string",
+      "description": "操作难度。简单 ≈ 新手可上手；中等 ≈ 需要一定厨房经验；进阶 ≈ 涉及刀工/火候/腌制等多步流程。",
+      "enum": ["简单", "中等", "进阶"]
+    },
+    "timeMinutes": {
+      "type": "integer",
+      "description": "估计总用时（含准备 + 烹饪），单位分钟。",
+      "minimum": 1,
+      "maximum": 240
+    },
+    "tastes": {
+      "type": "array",
+      "description": "主要口味标签。可多选；推荐选取最显著的 1-3 个。",
+      "minItems": 1,
+      "maxItems": 4,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": ["清淡", "咸鲜", "酸甜", "微辣", "重辣", "麻辣"]
+      }
+    },
+    "contains": {
+      "type": "array",
+      "description": "「忌口标签」。该菜含有此特征时填入；用户在 UI 中选择对应忌口后会过滤掉本菜。例如菜里有牛肉就填 `无牛肉`，含花生就填 `无花生`。`素食` 含义相反：标记本菜符合素食可在素食模式下保留（实现细节见 lib/recommend.ts）。",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "素食",
+          "无猪肉",
+          "无牛肉",
+          "无海鲜",
+          "无辣",
+          "无蛋",
+          "无奶",
+          "无花生"
+        ]
+      }
+    },
+    "steps": {
+      "type": "array",
+      "description": "做法步骤。每条一句话，建议 8-40 字。3-6 步最佳。",
+      "minItems": 1,
+      "maxItems": 12,
+      "items": {
+        "type": "string",
+        "minLength": 2,
+        "maxLength": 120
+      }
+    },
+    "reason": {
+      "type": "string",
+      "description": "一句话推荐语 / 卖点（≤ 40 字），用于卡片摘要。",
+      "minLength": 4,
+      "maxLength": 60
+    },
+    "serves": {
+      "type": "integer",
+      "description": "建议份数下限（人份）。推荐算法会按用户「人数」做加权。",
+      "minimum": 1,
+      "maximum": 10
+    },
+    "ingredients": {
+      "type": "array",
+      "description": "食材清单。每项需带数量描述与买菜分类，UI 会按分类合并去重生成购物清单。详情页基于此估算热量与价格。",
+      "minItems": 1,
+      "maxItems": 30,
+      "items": {
+        "$ref": "#/$defs/Ingredient"
+      }
+    },
+    "videoQuery": {
+      "type": "string",
+      "description": "可选：用于生成 Bilibili 视频搜索 URL 的关键词。留空会用 `name + \" 做法\"` 自动生成。",
+      "minLength": 2,
+      "maxLength": 60
+    },
+    "seasons": {
+      "type": "array",
+      "description": "可选：适合的季节标签。推荐时在对应季节会加分（不强过滤）。",
+      "uniqueItems": true,
+      "items": { "type": "string", "enum": ["春", "夏", "秋", "冬"] }
+    },
+    "weathers": {
+      "type": "array",
+      "description": "可选：适合的天气标签。",
+      "uniqueItems": true,
+      "items": { "type": "string", "enum": ["热", "冷", "雨", "晴", "潮湿", "干燥"] }
+    },
+    "regions": {
+      "type": "array",
+      "description": "可选：地区贴近度标签（七大区）。",
+      "uniqueItems": true,
+      "items": { "type": "string", "enum": ["华北", "华东", "华南", "华中", "西南", "西北", "东北"] }
+    },
+    "slots": {
+      "type": "array",
+      "description": "可选：适合的餐次。",
+      "uniqueItems": true,
+      "items": { "type": "string", "enum": ["breakfast", "lunch", "dinner"] }
+    },
+    "energy": {
+      "type": "array",
+      "description": "可选：烹饪能量/状态标签，用于天气推荐加分。",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "暖胃", "清爽", "解暑", "驱寒",
+          "下饭", "快手", "慢炖",
+          "适合冷", "适合热", "适合雨天"
+        ]
+      }
+    }
+  },
+  "$defs": {
+    "Ingredient": {
+      "type": "object",
+      "required": ["name", "qty", "category"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "食材名。允许用「/」分组类近食材，例如「葱姜蒜」「生抽 / 老抽」。",
+          "minLength": 1,
+          "maxLength": 32
+        },
+        "qty": {
+          "type": "string",
+          "description": "数量描述，文字形式。例如 `300g`、`2 根`、`1 把`、`适量`。",
+          "minLength": 1,
+          "maxLength": 32
+        },
+        "category": {
+          "type": "string",
+          "description": "买菜分类。决定本食材在「今日买菜清单」中的归类。",
+          "enum": ["蔬菜", "肉蛋豆制品", "调味/主食"]
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "id": "tomato-egg",
+      "name": "番茄炒蛋",
+      "course": "main",
+      "cuisine": "家常",
+      "difficulty": "简单",
+      "timeMinutes": 12,
+      "tastes": ["酸甜", "咸鲜"],
+      "contains": [],
+      "serves": 2,
+      "reason": "永远的国民下饭菜，番茄出汁配米饭，孩子大人都爱。",
+      "steps": [
+        "番茄切块，鸡蛋打散加少许盐",
+        "热油滑炒鸡蛋至嫩",
+        "下番茄炒出汁，加糖盐少许，回锅鸡蛋翻匀"
+      ],
+      "ingredients": [
+        { "name": "番茄", "qty": "2 个 (约 300g)", "category": "蔬菜" },
+        { "name": "鸡蛋", "qty": "3 个", "category": "肉蛋豆制品" },
+        { "name": "葱花", "qty": "1 小把", "category": "蔬菜" },
+        { "name": "白糖", "qty": "1 小勺", "category": "调味/主食" },
+        { "name": "食用油", "qty": "适量", "category": "调味/主食" },
+        { "name": "盐", "qty": "适量", "category": "调味/主食" }
+      ]
+    }
+  ]
+}

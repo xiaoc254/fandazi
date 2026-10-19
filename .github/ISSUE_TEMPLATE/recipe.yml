@@ -1,0 +1,119 @@
+name: 提交菜谱
+description: 投稿一道家常菜，让推荐池更丰富
+title: "[菜谱] "
+labels: ["recipe", "contribution"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢投稿！请按照以下字段填写菜谱信息。提交后维护者会将其录入 `client/src/data/recipes.ts`。
+        如果你能直接发起 PR，请参考仓库 `recipes.schema.json` 与 `CONTRIBUTING.md`。
+
+  - type: input
+    id: name
+    attributes:
+      label: 菜名
+      placeholder: 例如：番茄炒蛋
+    validations:
+      required: true
+
+  - type: dropdown
+    id: course
+    attributes:
+      label: 类别
+      options:
+        - main（主菜）
+        - veggie（素菜）
+        - soup（汤）
+        - staple（主食）
+    validations:
+      required: true
+
+  - type: dropdown
+    id: cuisine
+    attributes:
+      label: 菜系
+      options:
+        - 家常
+        - 川菜
+        - 粤菜
+        - 江浙
+        - 鲁菜
+        - 西北
+        - 东北
+    validations:
+      required: true
+
+  - type: dropdown
+    id: difficulty
+    attributes:
+      label: 难度
+      options:
+        - 简单
+        - 中等
+        - 进阶
+    validations:
+      required: true
+
+  - type: input
+    id: time
+    attributes:
+      label: 预计耗时（分钟）
+      placeholder: 例如：20
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: tastes
+    attributes:
+      label: 口味标签（可多选）
+      options:
+        - label: 清淡
+        - label: 咸鲜
+        - label: 酸甜
+        - label: 微辣
+        - label: 重辣
+        - label: 麻辣
+
+  - type: checkboxes
+    id: contains
+    attributes:
+      label: 包含的过敏/限制项（让有需要的用户能过滤掉）
+      options:
+        - label: 无猪肉
+        - label: 无牛肉
+        - label: 无海鲜
+        - label: 无蛋
+        - label: 无奶
+        - label: 无花生
+
+  - type: textarea
+    id: ingredients
+    attributes:
+      label: 食材（每行一项：名称 - 用量 - 分类）
+      description: 分类只能是「蔬菜」「肉蛋豆制品」「调味/主食」之一
+      placeholder: |
+        番茄 - 2 个 - 蔬菜
+        鸡蛋 - 3 个 - 肉蛋豆制品
+        盐 - 适量 - 调味/主食
+      render: text
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 做法步骤（每行一步）
+      placeholder: |
+        1. 番茄切块、鸡蛋打散
+        2. 热锅炒蛋盛出
+        3. 下番茄炒软，加蛋翻匀，调味出锅
+      render: text
+    validations:
+      required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: 备注（可选）
+      placeholder: 小贴士、常见踩坑、推荐搭配等

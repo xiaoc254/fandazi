@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 阅读贡献指南
+    url: https://github.com/meimengchengzhen/jin-tian-chi-shenme/blob/main/CONTRIBUTING.md
+    about: 在提交 issue 前，欢迎先阅读贡献指南，了解菜谱数据格式与 PR 流程。
+  - name: 查看现有 issue
+    url: https://github.com/meimengchengzhen/jin-tian-chi-shenme/issues
+    about: 在创建新 issue 前，先搜索一下是否已有相同问题或建议。

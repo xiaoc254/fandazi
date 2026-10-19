@@ -1,0 +1,70 @@
+name: Bug 反馈
+description: 报告一个使用中遇到的问题或异常
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢反馈！请尽量提供可复现步骤，方便我们快速定位问题。
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: 问题描述
+      description: 简明扼要地说明发生了什么。
+      placeholder: 例如：点击「换一组」按钮后页面白屏
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤
+      description: 请按顺序列出操作步骤
+      placeholder: |
+        1. 打开首页
+        2. 选择口味「微辣」
+        3. 点击「换一组」
+        4. 出现白屏
+      render: text
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期望表现
+      placeholder: 例如：应当展示一组新的推荐
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: 实际表现
+      placeholder: 例如：白屏，控制台报错 xxx
+    validations:
+      required: true
+
+  - type: input
+    id: env
+    attributes:
+      label: 运行环境
+      description: 浏览器 / 操作系统 / 设备
+      placeholder: 例如：Chrome 130 / macOS 14 / MacBook Pro
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: 控制台日志或截图（可选）
+      description: 请粘贴报错信息或贴上截图链接
+      render: shell
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: 提交前确认
+      options:
+        - label: 我已搜索过 issue 列表，确认没有重复
+          required: true

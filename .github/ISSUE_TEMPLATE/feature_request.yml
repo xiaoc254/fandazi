@@ -1,0 +1,53 @@
+name: 功能建议
+description: 提一个新功能或体验改进的想法
+title: "[Feature] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢你的想法！请尽量描述清楚使用场景和期望，方便我们评估优先级。
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: 你想解决什么问题？
+      description: 请描述当前使用中遇到的痛点或不便。
+      placeholder: 例如：每次推荐都要重新选口味，希望能记住上次的偏好
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 期望的解决方案
+      description: 你希望产品如何工作？UI 大概什么样？
+      placeholder: 例如：在偏好设置面板加一个「记住我的选择」开关，刷新后保留
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 你考虑过的其他方案（可选）
+      placeholder: 例如：手动收藏、导出 JSON 等
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: 涉及范围
+      multiple: true
+      options:
+        - 推荐算法
+        - 偏好设置
+        - 买菜清单
+        - 菜谱数据
+        - UI / 交互
+        - 文档 / 开源协作
+        - 其他
+
+  - type: textarea
+    id: context
+    attributes:
+      label: 补充信息（可选）
+      placeholder: 截图、参考链接、相关 issue 等
