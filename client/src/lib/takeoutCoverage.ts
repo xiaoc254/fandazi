@@ -191,14 +191,31 @@ function originLabel(cov: BrandCoverage): string {
   return "部分城市";
 }
 
+/**
+ * 用「已解析好的 place」匹配覆盖度。
+ * 与 matchCoverage 逻辑一致，但省掉重复的省份解析 —— pickTakeout 需要对 300+ 品牌
+ * 逐个打分，每次都重新 resolveTakeoutPlace（内部要遍历 34 个省）会明显拖慢。
+ */
+export function matchCoverageForPlace(
+  brand: TakeoutBrand,
+  place: TakeoutPlace,
+): CoverageMatch {
+  return matchCoverageCore(brand, inferCoverage(brand), place);
+}
+
 export function matchCoverage(
   brand: TakeoutBrand,
   city?: string | null,
   province?: string | null,
 ): CoverageMatch {
-  const cov = inferCoverage(brand);
-  const place = resolveTakeoutPlace(city, province);
+  return matchCoverageForPlace(brand, resolveTakeoutPlace(city, province));
+}
 
+function matchCoverageCore(
+  brand: TakeoutBrand,
+  cov: BrandCoverage,
+  place: TakeoutPlace,
+): CoverageMatch {
   if (!place.city && !place.province) {
     if (cov.national) {
       return {

@@ -4,7 +4,7 @@
 //  - 数据：static brands（含全国连锁），不抓取任何商户 / 平台 API。
 //  - 性能：只渲染特别推荐 + 4 个备选；详细菜单折叠展示。
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Bike,
   Wallet,
@@ -20,7 +20,6 @@ import {
   Search,
   X,
   MapPin,
-  LocateFixed,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -35,25 +34,18 @@ import {
   type TakeoutBrand,
   type TakeoutTaste,
 } from "@/data/takeoutBrands";
-import { PROVINCES, findProvinceByCity, findProvinceByName } from "@/lib/regions";
-import { autoLocate } from "@/lib/geoWeather";
-import { loadEnv, saveEnv } from "@/lib/environment";
 import {
   coverageTone,
-  localTakeoutDishes,
   localHotBrandNames,
-  resolveTakeoutPlace,
+  localTakeoutDishes,
   type CoverageMatch,
 } from "@/lib/takeoutCoverage";
+import { findProvinceByCity } from "@/lib/regions";
 
 const COMMON_CITIES = [
   "北京", "上海", "广州", "深圳", "杭州", "成都", "重庆", "武汉",
-  "南京", "西安", "苏州", "天津", "长沙", "郑州", "青岛", "厦门", "不限",
+  "南京", "西安", "苏州", "天津", "长沙", "郑州", "青岛", "厦门", "其他",
 ];
-
-const SELECT_CLASS =
-  "h-10 min-w-0 flex-1 rounded-lg border border-border bg-background px-2.5 text-[16px] sm:text-[13px]";
-
 
 const TASTE_OPTIONS: { id: TakeoutTaste; label: string }[] = [
   { id: "辣", label: "辣" },
@@ -98,6 +90,7 @@ function BrandCard({
   brand: TakeoutBrand;
   special?: boolean;
   defaultOpen?: boolean;
+  /** v12: 该品牌在当前城市/省份的覆盖判定 */
   coverage?: CoverageMatch;
 }) {
   const [open, setOpen] = useState<boolean>(!!defaultOpen);
@@ -128,19 +121,20 @@ function BrandCard({
               <Users className="h-3 w-3" />
               {brand.peopleMin}-{brand.peopleMax} 人
             </span>
-            <span>{brand.citySpread}</span>
-            {coverage && (
-              <span
-                className={`rounded-full border px-1.5 py-0 text-[10.5px] ${coverageTone(coverage.level)}`}
+            {coverage ? (
+              <Badge
+                variant="outline"
+                className={`rounded-full px-1.5 py-0 text-[10.5px] ${coverageTone(coverage.level)}`}
                 title={coverage.reason}
+                data-testid={`takeout-coverage-${brand.id}`}
               >
+                <MapPin className="mr-0.5 h-2.5 w-2.5" />
                 {coverage.label}
-              </span>
+              </Badge>
+            ) : (
+              <span>{brand.citySpread}</span>
             )}
           </div>
-          {coverage && (
-            <p className="mt-1 text-[11.5px] leading-relaxed text-muted-foreground">{coverage.reason}</p>
-          )}
           <p className="mt-1.5 text-[12.5px] leading-relaxed text-foreground/85">
             {brand.intro}
           </p>
@@ -189,11 +183,11 @@ function BrandCard({
                 </ul>
               </div>
               <div className="grid gap-1.5 sm:grid-cols-2">
-                <p className="rounded-md bg-emerald-500/10 px-2 py-1.5 text-[11.5px] text-emerald-800 dark:text-emerald-200">
+                <p className="rounded-md bg-emerald-50 px-2 py-1.5 text-[11.5px] text-emerald-800">
                   <Receipt className="mr-1 inline h-3 w-3" />
                   {brand.couponHint}
                 </p>
-                <p className="rounded-md bg-amber-500/10 px-2 py-1.5 text-[11.5px] text-amber-800 dark:text-amber-200">
+                <p className="rounded-md bg-amber-50 px-2 py-1.5 text-[11.5px] text-amber-800">
                   <Flame className="mr-1 inline h-3 w-3" />
                   {brand.calorieHint}
                 </p>
@@ -223,21 +217,9 @@ function BrandCard({
   );
 }
 
-export function TakeoutPanel({
-  initialCity,
-  initialProvince,
-}: {
-  initialCity?: string;
-  initialProvince?: string;
-} = {}) {
+export function TakeoutPanel() {
   // 智能推荐参数
-  const env0 = loadEnv();
-  const [province, setProvince] = useState<string>(
-    initialProvince || env0.province || findProvinceByCity(initialCity || env0.city || "北京")?.province || "北京",
-  );
-  const [city, setCity] = useState<string>(initialCity || env0.city || "北京");
-  const [locating, setLocating] = useState(false);
-  const [locateMsg, setLocateMsg] = useState<string>("");
+  const [city, setCity] = useState<string>("北京");
   const [budget, setBudget] = useState<number>(40); // 总预算
   const [people, setPeople] = useState<number>(1);
   const [tastes, setTastes] = useState<TakeoutTaste[]>([]);
@@ -245,82 +227,14 @@ export function TakeoutPanel({
   const [lowCalorie, setLowCalorie] = useState<boolean>(false);
   const [nonce, setNonce] = useState(0);
 
-  useEffect(() => {
-    if (initialCity) setCity(initialCity);
-    if (initialProvince) setProvince(initialProvince);
-  }, [initialCity, initialProvince]);
-
-  const currentProvince = useMemo(
-    () => findProvinceByName(province) ?? findProvinceByCity(city),
-    [province, city],
-  );
-  const cityChips = useMemo(() => {
-    const fromProv = currentProvince?.cities ?? [];
-    const merged = [...fromProv];
-    for (const c of COMMON_CITIES) {
-      if (!merged.includes(c)) merged.push(c);
-    }
-    return merged;
-  }, [currentProvince]);
-  const place = useMemo(() => resolveTakeoutPlace(city, province), [city, province]);
-  const localDishes = useMemo(() => localTakeoutDishes(city, province), [city, province]);
-  const localBrands = useMemo(
-    () => localHotBrandNames(TAKEOUT_BRANDS, city, province, 8),
+  // v12: 城市 → 省份/大区，用于按地区筛选「本城点得到」的品牌
+  const provinceDef = useMemo(() => findProvinceByCity(city), [city]);
+  const province = provinceDef?.province;
+  const localHots = useMemo(
+    () => localHotBrandNames(TAKEOUT_BRANDS, city, province, 10),
     [city, province],
   );
-
-  function chooseCity(nextCity: string) {
-    setCity(nextCity);
-    if (nextCity === "不限" || nextCity === "其他") {
-      setProvince("");
-      return;
-    }
-    const def = findProvinceByCity(nextCity);
-    if (def) setProvince(def.province);
-  }
-
-  function chooseProvince(next: string) {
-    setProvince(next);
-    const def = findProvinceByName(next);
-    if (!def) return;
-    if (!def.cities.includes(city)) setCity(def.cities[0]);
-  }
-
-  async function locateMe() {
-    setLocating(true);
-    setLocateMsg("");
-    try {
-      const r = await autoLocate();
-      if (r.error) {
-        setLocateMsg(r.error === "denied" ? "定位被拒绝，可手动选城市" : (r.errorMessage || "定位失败"));
-        return;
-      }
-      const locCity = r.location?.city;
-      const locProv = r.location?.province;
-      const def = findProvinceByCity(locCity) ?? findProvinceByName(locProv);
-      if (def) {
-        setProvince(def.province);
-        const matched = def.cities.find((c) => locCity && (locCity.includes(c) || c.includes(locCity)));
-        setCity(matched ?? def.cities[0]);
-        saveEnv({
-          ...loadEnv(),
-          province: def.province,
-          city: matched ?? def.cities[0],
-          region: def.region,
-          autoFilled: true,
-        });
-        setLocateMsg(`已定位到 ${matched ?? def.cities[0]}`);
-      } else if (locCity) {
-        setCity(locCity);
-        if (locProv) setProvince(locProv);
-        setLocateMsg(`已定位到 ${locCity}`);
-      } else {
-        setLocateMsg("定位成功，但没识别出城市，请手动选");
-      }
-    } finally {
-      setLocating(false);
-    }
-  }
+  const localDishes = useMemo(() => localTakeoutDishes(city, province), [city, province]);
 
   // 旧的「按预算档位」分区（保留作为备选 / 凑券提醒）
   const [budgetTier, setBudgetTier] = useState<BudgetId>("b25-40");
@@ -335,18 +249,8 @@ export function TakeoutPanel({
   const searchHits = useMemo(() => searchBrands(searchQuery, 8), [searchQuery]);
 
   const result = useMemo(
-    () => pickTakeout({
-      city,
-      province,
-      budget,
-      people,
-      tastes,
-      slot,
-      lowCalorie,
-      pinnedBrandId,
-      searchQuery: pinnedBrandId ? undefined : searchQuery,
-      seed: nonce,
-    }),
+    () => pickTakeout({ city, province, budget, people, tastes, slot, lowCalorie, pinnedBrandId, searchQuery: pinnedBrandId ? undefined : searchQuery }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [city, province, budget, people, tastes, slot, lowCalorie, nonce, pinnedBrandId, searchQuery],
   );
 
@@ -370,63 +274,29 @@ export function TakeoutPanel({
           今天外卖吃什么
         </h2>
         <p className="mt-1 text-[14px] text-muted-foreground">
-          按你所在城市判断能点到的连锁和本地口味。不实时读平台门店，先给你可搜的稳妥选项
+          告诉我们城市 / 预算 / 人数 / 口味，「替你决定」选一个全国连锁品牌 + 备选 · 不实时读取平台数据
         </p>
       </header>
 
       {/* 输入参数 */}
       <Card className="grain border-card-border/60 bg-card/70 p-4 sm:p-5">
         <div className="space-y-3">
-          {/* 城市：省份 + 城市原生 select，移动端更好点；热门城市 chip 快选 */}
+          {/* 城市 */}
           <div>
             <p className="mb-1 text-[12px] font-medium text-foreground/80">
-              <MapPin className="mb-0.5 mr-1 inline h-3.5 w-3.5 text-primary" />
-              所在城市
+              城市
+              <span className="ml-1.5 font-normal text-muted-foreground" data-testid="takeout-region-hint">
+                {provinceDef ? `· ${provinceDef.province} / ${provinceDef.region}` : "· 未识别省份，按全国连锁推荐"}
+              </span>
             </p>
-            <div className="flex flex-wrap items-center gap-2">
-              <select
-                className={SELECT_CLASS}
-                value={province || ""}
-                onChange={(e) => chooseProvince(e.target.value)}
-                aria-label="选择省份"
-                data-testid="takeout-province"
-              >
-                <option value="">不限省份</option>
-                {PROVINCES.map((p) => (
-                  <option key={p.province} value={p.province}>{p.province}</option>
-                ))}
-              </select>
-              <select
-                className={SELECT_CLASS}
-                value={city}
-                onChange={(e) => chooseCity(e.target.value)}
-                aria-label="选择城市"
-                data-testid="takeout-city"
-              >
-                <option value="不限">不限城市</option>
-                {(currentProvince?.cities ?? PROVINCES.flatMap((p) => p.cities)).map((c) => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
-              <button
-                type="button"
-                onClick={() => void locateMe()}
-                disabled={locating}
-                className="inline-flex h-10 shrink-0 items-center gap-1 rounded-lg border border-primary/30 bg-primary/5 px-3 text-[13px] text-primary hover-elevate disabled:opacity-60"
-                data-testid="takeout-locate"
-              >
-                <LocateFixed className="h-3.5 w-3.5" />
-                {locating ? "定位中" : "用定位"}
-              </button>
-            </div>
-            <div className="mt-2 flex flex-wrap gap-1" data-testid="takeout-cities">
-              {cityChips.map((c) => {
+            <div className="flex flex-wrap gap-1" data-testid="takeout-cities">
+              {COMMON_CITIES.map((c) => {
                 const active = city === c;
                 return (
                   <button
                     key={c}
                     type="button"
-                    onClick={() => chooseCity(c)}
+                    onClick={() => setCity(c)}
                     className={`rounded-full border px-2.5 py-1 text-[12px] transition-colors ${
                       active ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card/60 text-foreground/80 hover-elevate"
                     }`}
@@ -436,12 +306,6 @@ export function TakeoutPanel({
                 );
               })}
             </div>
-            <p className="mt-1.5 text-[11.5px] text-muted-foreground" data-testid="takeout-place-hint">
-              {place.city
-                ? `当前按 ${place.city}${place.region ? " · " + place.region : ""} 排序：本地连锁优先，全国品牌保底`
-                : "未指定城市时，只按全国连锁推荐"}
-              {locateMsg ? ` · ${locateMsg}` : ""}
-            </p>
           </div>
 
           {/* 预算 + 人数 */}
@@ -474,7 +338,7 @@ export function TakeoutPanel({
                   max={500}
                   value={budget}
                   onChange={(e) => setBudget(Number(e.target.value) || 40)}
-                  className="h-10 w-24 rounded-full border border-border bg-card/60 px-2.5 text-[16px] num sm:h-auto sm:text-[12.5px]"
+                  className="w-20 rounded-full border border-border bg-card/60 px-2.5 py-1 text-[12.5px] num"
                   aria-label="自定义预算"
                 />
               </div>
@@ -596,7 +460,7 @@ export function TakeoutPanel({
                 setSearchQuery(e.target.value);
                 if (pinnedBrandId) setPinnedBrandId(undefined);
               }}
-              className="h-10 w-full rounded-full border border-border bg-background/60 py-1.5 pl-7 pr-8 text-[16px] focus:border-primary/50 focus:outline-none sm:h-auto sm:text-[13px]"
+              className="w-full rounded-full border border-border bg-background/60 py-1.5 pl-7 pr-8 text-[13px] focus:border-primary/50 focus:outline-none"
               data-testid="takeout-brand-search"
               aria-label="搜索外卖品牌"
             />
@@ -634,31 +498,6 @@ export function TakeoutPanel({
           </p>
         )}
         <div className="mt-3">
-          {localBrands.length > 0 && city !== "不限" && (
-            <div className="mb-3">
-              <p className="mb-1 text-[11.5px] text-muted-foreground">{place.city || place.province}更常点的本地连锁</p>
-              <div className="flex flex-wrap gap-1.5" data-testid="takeout-local-chips">
-                {localBrands.map((b) => {
-                  const active = pinnedBrandId === b.id;
-                  return (
-                    <button
-                      key={b.id}
-                      type="button"
-                      onClick={() => setPinnedBrandId(b.id)}
-                      className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[12px] transition-colors hover-elevate active-elevate-2 ${
-                        active
-                          ? "border-primary bg-primary text-primary-foreground"
-                          : "border-emerald-500/30 bg-emerald-500/10 text-emerald-800 dark:text-emerald-200"
-                      }`}
-                      data-testid={`takeout-local-${b.id}`}
-                    >
-                      {b.name}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
           <p className="mb-1 text-[11.5px] text-muted-foreground">热门真实品牌（点击置顶）</p>
           <div className="flex flex-wrap gap-1.5" data-testid="takeout-hot-chips">
             {HOT_TAKEOUT_BRANDS.map((h) => {
@@ -685,55 +524,77 @@ export function TakeoutPanel({
           </div>
         </div>
         {result.budgetWarn && (
-          <p className="mt-2 inline-flex items-start gap-1 rounded-md bg-amber-500/10 px-2 py-1 text-[11.5px] text-amber-800 dark:text-amber-200" data-testid="takeout-budget-warn">
+          <p className="mt-2 inline-flex items-start gap-1 rounded-md bg-amber-50 px-2 py-1 text-[11.5px] text-amber-700" data-testid="takeout-budget-warn">
             <AlertTriangle className="mt-0.5 h-3 w-3 flex-shrink-0" />
             {result.budgetWarn}
           </p>
         )}
       </Card>
 
+      {/* v12: 本地能点到的连锁 —— 按城市/省份从品牌池筛出「本城常见」的区域品牌 */}
+      {localHots.length > 0 && (
+        <Card className="grain border-card-border/60 bg-card/70 p-4 sm:p-5" data-testid="takeout-local-hots">
+          <div className="mb-2 flex items-baseline justify-between gap-2">
+            <h3 className="font-display text-[1.05rem] tracking-tight">
+              <MapPin className="mb-0.5 mr-1 inline h-4 w-4 text-primary" />
+              {city}本地能点到
+            </h3>
+            <span className="text-[11px] text-muted-foreground">
+              按 {provinceDef?.province ?? city} 门店覆盖筛出 · 点 chip 置顶
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {localHots.map((b) => {
+              const active = pinnedBrandId === b.id;
+              return (
+                <button
+                  key={b.id}
+                  type="button"
+                  onClick={() => setPinnedBrandId(b.id)}
+                  className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[12px] transition-colors hover-elevate active-elevate-2 ${
+                    active
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border bg-card/60 text-foreground/85"
+                  }`}
+                  data-testid={`takeout-local-${b.id}`}
+                  title={`${b.name} · ${b.category} · ${city}常见门店`}
+                >
+                  <span aria-hidden>{b.emoji}</span>
+                  {b.name}
+                </button>
+              );
+            })}
+          </div>
+          {localDishes && (
+            <p className="mt-2 text-[11.5px] text-muted-foreground" data-testid="takeout-local-dishes">
+              {localDishes.city}本地口味：{localDishes.items.slice(0, 4).map((i) => i.name).join(" / ")}
+              {localDishes.vibe ? ` · ${localDishes.vibe}` : ""}
+            </p>
+          )}
+        </Card>
+      )}
+
       {/* 替你决定 */}
       <div>
         <p className="mb-2 text-[12.5px] text-primary/80" data-testid="takeout-decision">
-          {result.decisionLine} · {city === "不限" ? "不限城市" : city} · 人均 ¥{result.perPerson}
+          {result.decisionLine} · 城市：{city} · 人均 ¥{result.perPerson}
         </p>
         <p className="mb-2 text-[11.5px] text-muted-foreground" data-testid="takeout-balance-hint">
-          按地区覆盖排序：本地连锁优先，全国品牌保底；正餐优先，饮品不刷屏
+          品类平衡：正餐优先，饮品/咖啡不刷屏（除非选择「早餐」/「下午茶」时段或主动搜索咖啡品牌）
         </p>
-        <BrandCard brand={result.special} special defaultOpen coverage={result.coverageById[result.special.id]} />
+        {result.coverageById[result.special.id] && (
+          <p className="mb-2 text-[11.5px] text-emerald-700" data-testid="takeout-coverage-reason">
+            <MapPin className="mr-0.5 inline h-3 w-3" />
+            {result.coverageById[result.special.id].reason}
+          </p>
+        )}
+        <BrandCard
+          brand={result.special}
+          special
+          defaultOpen
+          coverage={result.coverageById[result.special.id]}
+        />
       </div>
-
-      {localDishes && (
-        <Card className="grain border-card-border/60 bg-card/70 p-4 sm:p-5" data-testid="takeout-local-dishes">
-          <h3 className="mb-1 font-display text-[1.05rem] tracking-tight">
-            <MapPin className="mb-0.5 mr-1 inline h-4 w-4 text-primary" />
-            {localDishes.city}现在更常搜这些本地味道
-          </h3>
-          <p className="mb-3 text-[12.5px] text-muted-foreground">{localDishes.vibe}{localDishes.cuisine ? ` · ${localDishes.cuisine}` : ""}</p>
-          <div className="grid gap-2 sm:grid-cols-2">
-            {localDishes.items.map((item) => (
-              <div key={item.name} className="rounded-lg border border-border/60 bg-background/50 p-2.5">
-                <p className="font-medium">{item.name}</p>
-                <p className="mt-0.5 text-[12px] leading-relaxed text-muted-foreground">{item.desc}</p>
-                <div className="mt-2 flex flex-wrap gap-1.5">
-                  {PLATFORMS.slice(0, 3).map((p) => (
-                    <a
-                      key={p.id}
-                      href={p.buildSearch(`${localDishes.city} ${item.name} 外卖`)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 rounded-full border border-primary/30 bg-primary/5 px-2 py-0.5 text-[11px] text-primary hover-elevate"
-                    >
-                      <ExternalLink className="h-3 w-3" />
-                      {p.label}
-                    </a>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </Card>
-      )}
 
       {/* 备选 */}
       <div>
@@ -783,7 +644,7 @@ export function TakeoutPanel({
         </div>
         <div className="mt-3 grid gap-3 sm:grid-cols-2">
           <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-3">
-            <h4 className="mb-1 text-[12px] font-semibold text-emerald-700 dark:text-emerald-200">怎么凑券</h4>
+            <h4 className="mb-1 text-[12px] font-semibold text-emerald-700">怎么凑券</h4>
             <ul className="space-y-1 text-[12.5px] text-foreground/85">
               {tier.coupon.map((c, i) => (
                 <li key={i} className="flex items-start gap-1.5">
@@ -794,7 +655,7 @@ export function TakeoutPanel({
             </ul>
           </div>
           <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-3">
-            <h4 className="mb-1 text-[12px] font-semibold text-amber-800 dark:text-amber-200">风险与提醒</h4>
+            <h4 className="mb-1 text-[12px] font-semibold text-amber-800">风险与提醒</h4>
             <ul className="space-y-1 text-[12.5px] text-foreground/85">
               {tier.risks.map((r, i) => (
                 <li key={i} className="flex items-start gap-1.5">

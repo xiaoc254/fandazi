@@ -13,7 +13,11 @@ import type {
   TakeoutCategory,
   TakeoutTaste,
 } from "./takeoutBrands.types";
-import { matchCoverage, type CoverageMatch } from "../lib/takeoutCoverage";
+import {
+  matchCoverageForPlace,
+  resolveTakeoutPlace,
+  type CoverageMatch,
+} from "../lib/takeoutCoverage";
 
 export type { TakeoutBrand, TakeoutCategory, TakeoutTaste } from "./takeoutBrands.types";
 
@@ -31,6 +35,7 @@ export const TAKEOUT_CATEGORIES: TakeoutCategory[] = [
 
 export interface TakeoutPickInput {
   city?: string;
+  /** 省份 / 直辖市；省略时会从 city 反推。两者都给时以 city 为准定位、province 兜底。 */
   province?: string;
   budget: number;
   people: number;
@@ -54,6 +59,10 @@ export interface TakeoutPickResult {
   perPerson: number;
   /** v4: 命中 pinned 但预算不匹配时的友好提示（不隐藏品牌）。 */
   budgetWarn?: string;
+  /**
+   * 地区覆盖判定，key = brand.id。仅包含本次 special + alternatives。
+   * 未选城市（或选「其他」）时为空对象 —— 此时不做地区分层。
+   */
   coverageById: Record<string, CoverageMatch>;
 }
 
@@ -208,8 +217,13 @@ export function pickTakeout(input: TakeoutPickInput): TakeoutPickResult {
     return ((h >>> 0) % 100000) / 100000;
   }
 
+  // v12: 地区定位 —— 只解析一次，避免 300+ 品牌各自重复遍历省份表。
+  const place = resolveTakeoutPlace(input.city, input.province);
+  const hasPlace = !!(place.city || place.province);
+  const covCache = new Map<string, CoverageMatch>();
+
   // 主推荐池：仅 A+B 真实品牌；C 模板永不进入主推荐。
-  const scoredAll = TAKEOUT_BRANDS.map((b) => {
+  const scored = TAKEOUT_BRANDS.map((b) => {
     let score = 0;
     if (perPerson >= b.budgetMin && perPerson <= b.budgetMax) score += 30;
     else if (perPerson >= b.budgetMin * 0.85 && perPerson <= b.budgetMax * 1.15) score += 18;
@@ -222,19 +236,38 @@ export function pickTakeout(input: TakeoutPickInput): TakeoutPickResult {
       if (b.tastes.includes("油腻")) score -= 10;
       if (b.tastes.includes("热量低") || b.category === "健康轻食" || b.category === "粥早餐") score += 14;
     }
-    const coverage = matchCoverage(b, input.city, input.province);
-    score += coverage.score;
+    if (hasPlace) {
+      // v12: 「本城能不能点到」是外卖的第一性问题，权重高于口味/时段等偏好。
+      // 覆盖分区间：local +34 / province +22 / region +14 / tier +10 / national +8 / rare -26。
+      const cover = matchCoverageForPlace(b, place);
+      covCache.set(b.id, cover);
+      score += cover.score;
+    } else if (b.citySpread === "全国") {
+      // 未选城市时保留原有的全国连锁轻微加权。
+      score += 4;
+    }
     // A 层加权（高置信全国连锁优先）
     if (b.realTier === "A") score += 6;
     // v11: seed 驱动的抖动 — 比之前的 Math.random()*6 更大，确保不同 seed 能撼动顶部。
     score += seedJitter(b.id, 1) * 14;
     // v11: 最近刷出过的品牌惩罚分（避免连续两次刷到同一家），刚刷过的扣最多。
     if (recent.has(b.id)) score -= 22;
-    return { brand: b, score, coverage };
+    return { brand: b, score };
   }).sort((a, b) => b.score - a.score);
 
-  const preferred = scoredAll.filter((s) => s.coverage.available);
-  const scored = preferred.length >= 6 ? preferred : scoredAll;
+  // v12: 地区可用性分层 —— 把「本城可点」的品牌整体提到「外地连锁 / 本地少见」之前。
+  // 只做软分层，不硬过滤：小城市品牌池稀疏时仍必须出得来结果。
+  let ranked = scored;
+  if (hasPlace) {
+    const reachable = scored.filter((s) => {
+      const m = covCache.get(s.brand.id);
+      return !m || (m.available && m.level !== "rare");
+    });
+    if (reachable.length >= 5) {
+      const reachableIds = new Set(reachable.map((s) => s.brand.id));
+      ranked = [...reachable, ...scored.filter((s) => !reachableIds.has(s.brand.id))];
+    }
+  }
 
   // v7: 品类平衡 — 除非时段是「早餐」/「下午茶」或用户明显在挑饮品，否则正餐优先。
   // - 用户没勾「热量低」+ 没勾任何饮品口味 + 时段是 lunch/dinner/midnight → 强制正餐为 special。
@@ -245,13 +278,13 @@ export function pickTakeout(input: TakeoutPickInput): TakeoutPickResult {
   const allowDrinkSpecial = drinkSlot || explicitlyDrink || !!input.pinnedBrandId || !!input.searchQuery;
 
   if (!allowDrinkSpecial) {
-    const topMain = scored.find((s) => isMainMealBrand(s.brand));
-    if (topMain && isDrinkBrand(scored[0].brand)) {
+    const topMain = ranked.find((s) => isMainMealBrand(s.brand));
+    if (topMain && isDrinkBrand(ranked[0].brand)) {
       // 把第一个非饮品提到前面
-      const idx = scored.indexOf(topMain);
+      const idx = ranked.indexOf(topMain);
       if (idx > 0) {
-        scored.splice(idx, 1);
-        scored.unshift(topMain);
+        ranked.splice(idx, 1);
+        ranked.unshift(topMain);
       }
     }
   }
@@ -260,17 +293,16 @@ export function pickTakeout(input: TakeoutPickInput): TakeoutPickResult {
   // 避免「健康轻食 lunch + 高预算」这类筛选条件下分数差距大让单一品牌长期霸榜。
   // 轮换池：在分数最高的 12 名内，剔除掉与 #1 相同 category 的并列候选不超过 3 个，
   // 同时尊重正餐/饮品平衡（不允许在 !allowDrinkSpecial 下从饮品选）。
-  if (hasSeed && scored.length > 1) {
-    const localRows = scored.filter((row) => row.coverage.level === "local" || row.coverage.level === "province" || row.coverage.level === "region");
-    const ranked = input.city && localRows.length >= 2
-      ? [...localRows, ...scored.filter((row) => !localRows.includes(row))]
-      : scored;
+  if (hasSeed && ranked.length > 1) {
     const TOP = Math.min(12, ranked.length);
     const pool: TakeoutBrand[] = [];
     const catCount: Record<string, number> = {};
     for (let i = 0; i < TOP; i++) {
       const b = ranked[i].brand;
       if (!allowDrinkSpecial && isDrinkBrand(b)) continue;
+      // v12: 轮换池同样排除本城点不到的品牌，避免「换一批」换出外地连锁。
+      const cover = covCache.get(b.id);
+      if (cover && (!cover.available || cover.level === "rare")) continue;
       const cat = b.category;
       if ((catCount[cat] ?? 0) >= 3) continue;
       pool.push(b);
@@ -281,18 +313,18 @@ export function pickTakeout(input: TakeoutPickInput): TakeoutPickResult {
       const k = Math.min(pool.length, 8);
       const j = Math.floor(seedJitter("__rot__", 7) * k);
       const chosen = pool[j] ?? pool[0];
-      // 把 chosen 提到 scored 顶部
-      const idx = scored.findIndex((s) => s.brand.id === chosen.id);
+      // 把 chosen 提到 ranked 顶部
+      const idx = ranked.findIndex((s) => s.brand.id === chosen.id);
       if (idx > 0) {
-        const [hit] = scored.splice(idx, 1);
-        scored.unshift(hit);
+        const [hit] = ranked.splice(idx, 1);
+        ranked.unshift(hit);
       }
     }
   }
 
   // v4: pinnedBrandId 强制置顶 — 即便预算不符，也用品牌作为 special，并给出预算提示。
-  let special = scored[0].brand;
-  let alternatives = scored.slice(1, 5).map((s) => s.brand);
+  let special = ranked[0].brand;
+  let alternatives = ranked.slice(1, 5).map((s) => s.brand);
   let budgetWarn: string | undefined;
   if (input.pinnedBrandId) {
     const pinned = TAKEOUT_BRANDS.find((b) => b.id === input.pinnedBrandId);
@@ -306,14 +338,14 @@ export function pickTakeout(input: TakeoutPickInput): TakeoutPickResult {
         }
       }
       special = pinned;
-      // alternatives: 去重后从 scored 取 4 个
-      alternatives = scored.filter((s) => s.brand.id !== pinned.id).slice(0, 4).map((s) => s.brand);
+      // alternatives: 去重后从 ranked 取 4 个
+      alternatives = ranked.filter((s) => s.brand.id !== pinned.id).slice(0, 4).map((s) => s.brand);
     }
   } else if (input.searchQuery) {
     const hits = searchBrands(input.searchQuery, 6);
     if (hits.length > 0) {
       special = hits[0];
-      const fillerScore = scored.filter((s) => s.brand.id !== hits[0].id).map((s) => s.brand);
+      const fillerScore = ranked.filter((s) => s.brand.id !== hits[0].id).map((s) => s.brand);
       const rest = [...hits.slice(1), ...fillerScore].slice(0, 4);
       const seen = new Set<string>([special.id]);
       alternatives = [];
@@ -333,8 +365,18 @@ export function pickTakeout(input: TakeoutPickInput): TakeoutPickResult {
   }
 
   // v7: 候选去刷屏 — 饮品最多 1 个；至少 2 个正餐/主食；保留多样化品类。
-  alternatives = balanceAlternatives(alternatives, scored.map((s) => s.brand), special, allowDrinkSpecial);
+  alternatives = balanceAlternatives(alternatives, ranked.map((s) => s.brand), special, allowDrinkSpecial);
 
+  // v12: 只回传本次结果涉及的覆盖判定，避免每次都复制 300+ 条对象。
+  const coverageById: Record<string, CoverageMatch> = {};
+  if (hasPlace) {
+    for (const b of [special, ...alternatives]) {
+      const cover = covCache.get(b.id);
+      if (cover) coverageById[b.id] = cover;
+    }
+  }
+
+  const specialCoverage = coverageById[special.id];
   const decisionLine = (() => {
     const parts: string[] = [];
     if (input.pinnedBrandId || input.searchQuery) parts.push("已置顶你点名的品牌");
@@ -342,17 +384,11 @@ export function pickTakeout(input: TakeoutPickInput): TakeoutPickResult {
     if (input.tastes.length > 0) parts.push(`偏好「${input.tastes.join("·")}」`);
     if (input.slot === "breakfast") parts.push("早餐场景");
     if (input.slot === "midnight") parts.push("深夜");
-    if (input.city && input.city !== "不限" && input.city !== "其他") parts.unshift(`${input.city}可点`);
     if (parts.length === 0) parts.push(`人均 ${perPerson} 元 · ${input.people} 人`);
+    // 地区标签放最后：不能挤掉上面的「人均」兜底说明
+    if (specialCoverage) parts.push(specialCoverage.label);
     return `今天替你决定：${special.name} — ${parts.join(" / ")}`;
   })();
-
-  const coverageById: Record<string, CoverageMatch> = {};
-  for (const row of scoredAll) coverageById[row.brand.id] = row.coverage;
-  if (!coverageById[special.id]) coverageById[special.id] = matchCoverage(special, input.city, input.province);
-  for (const b of alternatives) {
-    if (!coverageById[b.id]) coverageById[b.id] = matchCoverage(b, input.city, input.province);
-  }
 
   return { special, alternatives, decisionLine, perPerson, budgetWarn, coverageById };
 }

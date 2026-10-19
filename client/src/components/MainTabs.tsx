@@ -37,7 +37,6 @@ export type MainTabId =
 export interface MainTabDef {
   id: MainTabId;
   label: string;
-  shortLabel: string;
   hint: string;
   icon: typeof Sparkles;
 }
@@ -49,11 +48,11 @@ export interface MainTabDef {
 // - health：健康饮食（一周菜单等也从这里进入）
 // - companion：生活陪伴（含 hotboard 入口卡片）
 export const PRIMARY_TABS: MainTabDef[] = [
-  { id: "home", label: "一键决定", shortLabel: "决定", hint: "今晚吃啥", icon: Sparkles },
-  { id: "family", label: "家庭厨房", shortLabel: "家庭", hint: "口味·冰箱·剩菜", icon: UsersRound },
-  { id: "search", label: "想吃什么", shortLabel: "想吃", hint: "菜谱·外卖·零食", icon: Search },
-  { id: "health", label: "健康饮食", shortLabel: "健康", hint: "低糖·低盐·一周菜单", icon: HeartPulse },
-  { id: "companion", label: "生活陪伴", shortLabel: "陪伴", hint: "饭桌·热榜·话题", icon: Coffee },
+  { id: "home", label: "一键决定", hint: "今晚吃啥", icon: Sparkles },
+  { id: "family", label: "家庭厨房", hint: "口味·冰箱·剩菜", icon: UsersRound },
+  { id: "search", label: "想吃什么", hint: "菜谱·外卖·零食", icon: Search },
+  { id: "health", label: "健康饮食", hint: "低糖·低盐·一周菜单", icon: HeartPulse },
+  { id: "companion", label: "生活陪伴", hint: "饭桌·热榜·话题", icon: Coffee },
 ];
 
 // 兼容旧引用：MAIN_TABS 仍然导出，但只含一级入口。
@@ -216,7 +215,7 @@ export function MainTabsNav({ active, onChange }: Props) {
                   }`}
                 />
                 <span className="flex min-w-0 flex-col items-start leading-tight">
-                  <span className="block truncate whitespace-nowrap"><span className="sm:hidden">{t.shortLabel}</span><span className="hidden sm:inline">{t.label}</span></span>
+                  <span className="block truncate whitespace-nowrap">{t.label}</span>
                   <span
                     className={`hidden truncate whitespace-nowrap text-[10.5px] font-normal sm:block ${
                       isActive ? "text-primary-foreground/85" : "text-muted-foreground"

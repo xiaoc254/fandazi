@@ -97,7 +97,7 @@ interface SoloResult {
   items: ReturnType<typeof buildLazyItems>;
 }
 
-export function SoloTonightPanel({ city, province }: { city?: string; province?: string } = {}) {
+export function SoloTonightPanel() {
   const { toast } = useToast();
   const [mood, setMood] = useState<SoloMood>("随便");
   const [mode, setMode] = useState<SoloMode>("都行");
@@ -152,8 +152,6 @@ export function SoloTonightPanel({ city, province }: { city?: string; province?:
         ? (window as any).__soloLastTakeoutId__ ?? null
         : null;
     const takeout = pickTakeout({
-      city,
-      province,
       budget: budgetMeta.cap + Math.floor(rng(3) * 6) - 3,
       people: 1,
       tastes,
@@ -309,8 +307,6 @@ export function SoloTonightPanel({ city, province }: { city?: string; province?:
     snackR.dislikes.size,
     fruitR.likes.size,
     fruitR.dislikes.size,
-    city,
-    province,
   ]);
 
   function refreshOne() {

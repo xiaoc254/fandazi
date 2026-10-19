@@ -1063,12 +1063,12 @@ export default function Home() {
   );
 
   return (
-    <div className="min-h-screen overflow-x-hidden pb-[max(6rem,calc(4.5rem+env(safe-area-inset-bottom,0px)))]">
+    <div className="min-h-safe-screen pb-24">
       {/* Header */}
-      <header className="relative z-10 border-b border-border/60 bg-background pt-[env(safe-area-inset-top,0px)]">
+      <header className="relative z-10 border-b border-border/60 bg-background">
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-2 px-4 py-3 sm:px-6">
-          <div className="shrink-0"><Wordmark /></div>
-          <div className="flex min-w-0 flex-1 items-center justify-end gap-1 overflow-x-auto no-scrollbar sm:gap-2">
+          <Wordmark />
+          <div className="flex items-center gap-2">
             <span
               className="hidden items-center gap-1 rounded-full border border-border/70 bg-card/60 px-3 py-1.5 text-[11px] text-muted-foreground sm:inline-flex"
               data-testid="badge-meal-theme"
@@ -1127,7 +1127,7 @@ export default function Home() {
               }}
               data-testid="button-page-size"
               title={`当前字号：${PAGE_SIZES.find((p) => p.id === pageSize)?.label} · 点击循环切换`}
-              className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-card/60 px-2.5 py-1.5 text-[12.5px] text-foreground/85 hover-elevate active-elevate-2 md:hidden"
+              className="hidden items-center gap-1.5 rounded-full border border-border/70 bg-card/60 px-3 py-1.5 text-[12.5px] text-foreground/85 hover-elevate active-elevate-2 md:inline-flex"
             >
               <TypeIcon className="h-3.5 w-3.5 text-primary" />
               <span data-testid="text-page-size-label">
@@ -1139,7 +1139,7 @@ export default function Home() {
               aria-label="页面大小"
               data-testid="page-size-segment"
               title="选择页面字号 · 默认推荐"
-              className="hidden shrink-0 items-center gap-0.5 overflow-x-auto rounded-full border border-border/70 bg-card/60 p-0.5 text-[11.5px] md:inline-flex"
+              className="inline-flex shrink-0 items-center gap-0.5 overflow-x-auto rounded-full border border-border/70 bg-card/60 p-0.5 text-[11.5px]"
             >
               <TypeIcon className="ml-1 mr-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
               {PAGE_SIZES.map((p) => {
@@ -1240,11 +1240,11 @@ export default function Home() {
                 />
               )}
               {tab === "travel" && <TravelPanel />}
-              {tab === "takeout" && <TakeoutPanel initialCity={env.city} initialProvince={env.province} />}
+              {tab === "takeout" && <TakeoutPanel />}
               {tab === "snacks" && <SnacksPanel />}
               {tab === "fruit" && <FruitPanel />}
               {tab === "lazy" && <LazyDecisionPanel />}
-              {tab === "solo" && <SoloTonightPanel city={env.city} province={env.province} />}
+              {tab === "solo" && <SoloTonightPanel />}
               {tab === "family-tonight" && <FamilyTonightPanel />}
               {tab === "tonight-plan" && <TonightPlanPanel />}
               {tab === "weekly" && <WeeklyMenuPanel />}

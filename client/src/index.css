@@ -73,19 +73,40 @@
   --tracking-normal: 0em;
   --spacing: 0.25rem;
 
-  --sidebar-primary-border: hsl(var(--sidebar-primary) / 0.55);
+  --sidebar-primary-border: hsl(var(--sidebar-primary));
+  --sidebar-primary-border: hsl(
+    from hsl(var(--sidebar-primary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha
+  );
 
-  --sidebar-accent-border: hsl(var(--sidebar-accent) / 0.55);
+  --sidebar-accent-border: hsl(var(--sidebar-accent));
+  --sidebar-accent-border: hsl(
+    from hsl(var(--sidebar-accent)) h s calc(l + var(--opaque-button-border-intensity)) / alpha
+  );
 
-  --primary-border: hsl(var(--primary) / 0.55);
+  --primary-border: hsl(var(--primary));
+  --primary-border: hsl(
+    from hsl(var(--primary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha
+  );
 
-  --secondary-border: hsl(var(--secondary) / 0.55);
+  --secondary-border: hsl(var(--secondary));
+  --secondary-border: hsl(
+    from hsl(var(--secondary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha
+  );
 
-  --muted-border: hsl(var(--muted) / 0.55);
+  --muted-border: hsl(var(--muted));
+  --muted-border: hsl(
+    from hsl(var(--muted)) h s calc(l + var(--opaque-button-border-intensity)) / alpha
+  );
 
-  --accent-border: hsl(var(--accent) / 0.55);
+  --accent-border: hsl(var(--accent));
+  --accent-border: hsl(
+    from hsl(var(--accent)) h s calc(l + var(--opaque-button-border-intensity)) / alpha
+  );
 
-  --destructive-border: hsl(var(--destructive) / 0.55);
+  --destructive-border: hsl(var(--destructive));
+  --destructive-border: hsl(
+    from hsl(var(--destructive)) h s calc(l + var(--opaque-button-border-intensity)) / alpha
+  );
 }
 
 /* === v2: 整站主题（data-theme） === */
@@ -652,58 +673,80 @@
   --chart-4: 200 35% 60%;
   --chart-5: 340 45% 65%;
 
-  --sidebar-primary-border: hsl(var(--sidebar-primary) / 0.55);
-  --sidebar-accent-border: hsl(var(--sidebar-accent) / 0.55);
-  --primary-border: hsl(var(--primary) / 0.55);
-  --secondary-border: hsl(var(--secondary) / 0.55);
-  --muted-border: hsl(var(--muted) / 0.55);
-  --accent-border: hsl(var(--accent) / 0.55);
-  --destructive-border: hsl(var(--destructive) / 0.55);
+  --sidebar-primary-border: hsl(var(--sidebar-primary));
+  --sidebar-primary-border: hsl(
+    from hsl(var(--sidebar-primary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha
+  );
+  --sidebar-accent-border: hsl(var(--sidebar-accent));
+  --sidebar-accent-border: hsl(
+    from hsl(var(--sidebar-accent)) h s calc(l + var(--opaque-button-border-intensity)) / alpha
+  );
+  --primary-border: hsl(var(--primary));
+  --primary-border: hsl(
+    from hsl(var(--primary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha
+  );
+  --secondary-border: hsl(var(--secondary));
+  --secondary-border: hsl(
+    from hsl(var(--secondary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha
+  );
+  --muted-border: hsl(var(--muted));
+  --muted-border: hsl(
+    from hsl(var(--muted)) h s calc(l + var(--opaque-button-border-intensity)) / alpha
+  );
+  --accent-border: hsl(var(--accent));
+  --accent-border: hsl(
+    from hsl(var(--accent)) h s calc(l + var(--opaque-button-border-intensity)) / alpha
+  );
+  --destructive-border: hsl(var(--destructive));
+  --destructive-border: hsl(
+    from hsl(var(--destructive)) h s calc(l + var(--opaque-button-border-intensity)) / alpha
+  );
 }
 
 @layer base {
   * {
     @apply border-border;
   }
-  html {
-    -webkit-text-size-adjust: 100%;
-    text-size-adjust: 100%;
-    overflow-x: hidden;
-    /* Firefox / Safari 不支持 zoom 时，用 html 字号承担页面缩放 */
-    font-size: calc(16px * var(--page-zoom, 1.1));
-  }
   html, body {
     @apply font-sans antialiased bg-background text-foreground;
     font-feature-settings: "ss01", "cv11";
-    max-width: 100%;
   }
   body {
-    overflow-x: hidden;
     background-image:
       radial-gradient(circle at 12% 8%, hsl(38 60% 88% / 0.55), transparent 38%),
       radial-gradient(circle at 92% 110%, hsl(18 55% 86% / 0.45), transparent 42%);
-    background-attachment: scroll;
-    padding-left: env(safe-area-inset-left, 0px);
-    padding-right: env(safe-area-inset-right, 0px);
+    background-attachment: fixed;
+    /* 页面大小（pageSize.ts）— 默认 1.1（比经典版略大）。
+       注意：仅桌面/Android 走 zoom；iOS 的 zoom 是视觉缩放，会带偏 fixed 定位，
+       由下面 [data-ios] 段关闭并改用根字号缩放。 */
+    zoom: var(--page-zoom, 1.1);
   }
-  @supports (zoom: 1) {
-    html { font-size: 16px; }
-    body { zoom: var(--page-zoom, 1.1); }
-  }
-  /* 移动端字号兜底：基础文字提升到 16px（高于浏览器默认 14-15px） */
+  /* 移动端字号兜底：基础文字提升到 16px（高于浏览器默认 14-15px），
+     避免「看不清楚」；桌面端继续按 zoom 缩放。 */
   @media (max-width: 640px) {
-    html { font-size: calc(17px * var(--page-zoom, 1.1)); }
+    html { font-size: 17px; }
   }
-  @supports (zoom: 1) {
-    @media (max-width: 640px) {
-      html { font-size: 17px; }
-    }
+
+  /* === iOS / iPadOS 兼容 ===
+   * 1) CSS zoom 在 iOS Safari 上是视觉缩放：position:fixed 元素（「今日已选」悬浮球）
+   *    的定位基准、vh 计算、视觉视口会一起失准，并和双指手势互相干扰。
+   *    → 关闭 body 的 zoom，改用根字号缩放（复用同一个 --page-zoom，rem 类元素照常放大）。
+   * 2) background-attachment: fixed 在 iOS 上不生效且拖慢滚动 → 退回 scroll。
+   * 3) 输入框字号 < 16px 时 iOS 会在聚焦瞬间强制放大页面，和页面缩放叠加会冲垮布局。
+   */
+  html[data-ios="1"] {
+    font-size: calc(17px * var(--page-zoom, 1.1));
   }
-  @media (min-width: 641px) {
-    body { background-attachment: fixed; }
+  html[data-ios="1"] body {
+    zoom: 1;
+    background-attachment: scroll;
+    /* 安全区兜底：不要让页面内容被 Home Indicator 压住 */
+    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
-  input, select, textarea {
-    font-size: max(16px, 1em);
+  html[data-ios="1"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  html[data-ios="1"] textarea,
+  html[data-ios="1"] select {
+    font-size: 16px;
   }
   ::selection {
     background-color: hsl(var(--primary) / 0.22);
@@ -724,11 +767,6 @@
     opacity: 0.45;
     mix-blend-mode: multiply;
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.16  0 0 0 0 0.10  0 0 0 0 0.06  0 0 0 0.06 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
-  }
-  :root[data-theme="midnight"] .grain::after,
-  .dark .grain::after {
-    mix-blend-mode: overlay;
-    opacity: 0.18;
   }
 }
 
@@ -806,6 +844,23 @@
   }
   .no-scrollbar::-webkit-scrollbar {
     display: none;
+  }
+  /* 悬浮元素的安全区定位：iPhone 的 Home Indicator 在 viewport-fit=cover 下会盖住
+     固定的 bottom-3 / bottom-5，这里把 env(safe-area-inset-bottom) 叠加进去。
+     非 iOS / 无安全区时 env() 回退 0，与原来的位置完全一致。 */
+  .bottom-safe {
+    bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
+  }
+  @media (min-width: 640px) {
+    .bottom-safe {
+      bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px));
+    }
+  }
+  /* iOS 的 100vh 含地址栏隐藏后的高度，min-h-screen 会让页面多出一截可滚动空白。
+     先给 100vh 兜底，支持 dvh 的浏览器（iOS 15.4+）自动取动态视口高度。 */
+  .min-h-safe-screen {
+    min-height: 100vh;
+    min-height: 100dvh;
   }
   @keyframes shake-rise {
     0% { transform: translateY(8px) rotate(-2deg); opacity: 0; }

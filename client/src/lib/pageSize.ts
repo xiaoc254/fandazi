@@ -45,13 +45,32 @@ export function savePageSize(id: PageSizeId): void {
   }
 }
 
+/** iOS / iPadOS 判定（含 iPadOS 13+ 把 UA 伪装成 macOS 的情况）。 */
+export function isIOSDevice(): boolean {
+  if (typeof navigator === "undefined") return false;
+  if (/iPad|iPhone|iPod/.test(navigator.userAgent)) return true;
+  // iPadOS 13+ 的 Safari 默认 UA 与 macOS 一致，用触点数区分
+  return navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
+}
+
+/** 给 <html> 打 iOS 标记，供 CSS 做降级（见 index.css 的 iOS 兼容段）。
+ *  需在首屏渲染前调用，避免「先按 zoom 排版、再回退」的闪动。 */
+export function markIOSDevice(): void {
+  if (typeof document === "undefined") return;
+  if (isIOSDevice()) document.documentElement.dataset.ios = "1";
+}
+
 /** 应用 zoom 到 <html data-page-size>，CSS 选择器再把 zoom 落到 body。
  *  之所以走 data-attr + CSS 而不是直接给 body 设 zoom，是为了在 SSR/初始空 DOM
- *  时也能优雅 no-op；并且方便未来切换实现（rem / transform）。 */
+ *  时也能优雅 no-op；并且方便未来切换实现（rem / transform）。
+ *
+ *  注意：iOS Safari 上 CSS zoom 会破坏 position:fixed 与视口计算，
+ *  因此 body 的 zoom 由 CSS 在 data-ios 下关闭，改用根字号缩放（--page-zoom 仍复用）。 */
 export function applyPageSize(id: PageSizeId): void {
   if (typeof document === "undefined") return;
   const meta = getPageSizeMeta(id);
   try {
+    markIOSDevice();
     document.documentElement.dataset.pageSize = id;
     // 同步设置 CSS 变量，body CSS 选择器引用它
     document.documentElement.style.setProperty("--page-zoom", String(meta.zoom));

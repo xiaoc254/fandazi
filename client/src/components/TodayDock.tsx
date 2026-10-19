@@ -71,7 +71,7 @@ export function TodayDock() {
 
   return (
     <div
-      className="fixed bottom-3 right-3 z-40 sm:bottom-5 sm:right-5"
+      className="bottom-safe fixed right-3 z-40 sm:right-5"
       data-testid="today-dock"
     >
       {!open && (

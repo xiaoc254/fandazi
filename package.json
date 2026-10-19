@@ -27,7 +27,6 @@
     "start": "NODE_ENV=production node dist/index.cjs",
     "check": "tsc",
     "check:recommend": "tsx script/check-recommend.ts",
-    "check:takeout": "tsx script/check-takeout-region.ts",
     "check:links": "tsx script/check-links.ts",
     "gen:recipes": "tsx script/generate-recipes.ts",
     "db:push": "drizzle-kit push"
@@ -121,13 +120,6 @@
     "typescript": "5.6.3",
     "vite": "^7.3.0"
   },
-  "browserslist": [
-    "> 0.5%",
-    "last 2 versions",
-    "not dead",
-    "iOS >= 13",
-    "Android >= 8"
-  ],
   "optionalDependencies": {
     "bufferutil": "^4.0.8"
   },
