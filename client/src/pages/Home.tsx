@@ -1066,9 +1066,9 @@ export default function Home() {
     <div className="min-h-safe-screen pb-24">
       {/* Header */}
       <header className="relative z-10 border-b border-border/60 bg-background">
-        <div className="mx-auto flex max-w-3xl items-center justify-between gap-2 px-4 py-3 sm:px-6">
-          <Wordmark />
-          <div className="flex items-center gap-2">
+        <div className="mx-auto flex max-w-3xl flex-wrap items-center justify-between gap-2 gap-y-2 px-4 py-3 sm:px-6">
+          <Wordmark className="shrink-0 whitespace-nowrap" />
+          <div className="flex flex-wrap items-center gap-2">
             <span
               className="hidden items-center gap-1 rounded-full border border-border/70 bg-card/60 px-3 py-1.5 text-[11px] text-muted-foreground sm:inline-flex"
               data-testid="badge-meal-theme"
@@ -1110,7 +1110,7 @@ export default function Home() {
             >
               <Cloud className={`h-3.5 w-3.5 ${cloudConfigured ? "text-primary" : "text-muted-foreground"}`} />
               <span className="hidden sm:inline">云端同步</span>
-              <span className="rounded-full bg-primary/10 px-1.5 text-[9.5px] text-primary num">Beta</span>
+              <span className="hidden rounded-full bg-primary/10 px-1.5 text-[9.5px] text-primary num sm:inline">Beta</span>
             </button>
             {/* 页面大小：四档分段选择（小 / 中 / 默认 / 大），同时可见，当前选中态高亮。
                 同时保留循环按钮（含图标 + 当前档名）作为快速切换；分段选择紧跟其后。 */}
