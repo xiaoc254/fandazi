@@ -911,8 +911,9 @@ console.log("== v11: 顶部主导航收纳为 5 个一级入口（不再依赖�
     ["home", "family", "search", "health", "companion"].every((id) => src.includes(`id: "${id}"`)),
   );
   check(
-    "MainTabs 按钮高度 h-12（更大）",
-    src.includes("h-12"),
+    // 移动端竖排布局：图标在上、四字全称在下，高度 h-[52px]；sm+ 桌面端 h-14。
+    "MainTabs 按钮高度 h-[52px]（移动端竖排）/ h-14（桌面）",
+    src.includes("h-[52px]") && src.includes("sm:h-14"),
   );
   // 不应再依赖 horizontal scroll / 拖拽 — 用户说「减少拖动麻烦」
   check(
