@@ -37,9 +37,9 @@ import {
 import {
   coverageTone,
   localHotBrandNames,
-  localTakeoutDishes,
   type CoverageMatch,
 } from "@/lib/takeoutCoverage";
+import { localTakeoutDishes } from "@/lib/takeoutLocalDishes";
 import { findProvinceByCity } from "@/lib/regions";
 
 const COMMON_CITIES = [

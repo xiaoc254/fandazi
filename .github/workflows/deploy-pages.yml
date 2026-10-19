@@ -6,15 +6,21 @@ on:
       - main
   workflow_dispatch:
 
+# 最小权限：
+#  - contents: read       只读代码
+#  - pages: write         发布到 Pages
+#  - id-token: write      OIDC 换取部署令牌（替代长期 token）
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
 
 concurrency:
   group: pages
   cancel-in-progress: false
 
 jobs:
-  build-and-publish:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -35,18 +41,31 @@ jobs:
       - name: Recommend / data invariants check
         run: npm run check:recommend
 
+      # 只构建前端。npm run build 会连带 esbuild 打包 Express server，
+      # Pages 用不到，反而多一个可能失败/变慢的环节。
       - name: Build static site
-        run: npm run build
+        run: npm run build:pages
 
-      - name: Add SPA 404 fallback and disable Jekyll
-        run: |
-          cp dist/public/index.html dist/public/404.html
-          touch dist/public/.nojekyll
+      # 应用用 hash 路由（wouter/useHashLocation），正常不需要服务端回退；
+      # 复制一份 404.html 只为兜住手输 /fandazi/takeout 这类无 hash 的地址。
+      - name: Add 404 fallback
+        run: cp dist/public/index.html dist/public/404.html
 
-      - name: Publish to gh-pages branch
-        uses: peaceiris/actions-gh-pages@v4
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist/public
-          publish_branch: gh-pages
-          force_orphan: true
+          path: ./dist/public
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

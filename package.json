@@ -2,10 +2,10 @@
   "name": "fanda",
   "version": "1.0.0",
   "description": "饭搭子 · 今天吃什么 — 替选择困难的人一键决定吃 / 买 / 看 / 聊：一桌菜、一周菜单、外卖、零食、水果、健康饮食、饭桌话题与陪伴。纯前端 PWA，零登录。",
-  "homepage": "https://meimengchengzhen.github.io/jin-tian-chi-shenme/",
+  "homepage": "https://xiaoc254.github.io/fandazi/",
   "repository": {
     "type": "git",
-    "url": "https://github.com/meimengchengzhen/jin-tian-chi-shenme.git"
+    "url": "https://github.com/xiaoc254/fandazi.git"
   },
   "keywords": [
     "今天吃什么",
@@ -24,6 +24,7 @@
   "scripts": {
     "dev": "NODE_ENV=development tsx server/index.ts",
     "build": "tsx script/build.ts",
+    "build:pages": "vite build",
     "start": "NODE_ENV=production node dist/index.cjs",
     "check": "tsc",
     "check:recommend": "tsx script/check-recommend.ts",

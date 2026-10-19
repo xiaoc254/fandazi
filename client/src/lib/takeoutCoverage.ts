@@ -4,13 +4,18 @@
 
 import type { TakeoutBrand } from "../data/takeoutBrands.types";
 import type { RegionTag } from "../data/recipes";
-import { CITY_FOODS, type CityFoodItem } from "../data/cityFoods";
 import {
   PROVINCES,
   findProvinceByCity,
   findProvinceByName,
   type ProvinceDef,
 } from "./regions";
+
+// 注意：这里刻意不引入 data/cityFoods。
+// takeoutBrands → takeoutCoverage 在首屏主链上（manualChunks 把 takeout.ts 与
+// takeoutBrands.ts 合并成 data-takeout），一旦这里依赖 cityFoods，
+// 首屏就会白白预加载那 18KB 城市美食数据。
+// 「本地特色菜」相关逻辑因此在 ./takeoutLocalDishes 里单独实现。
 
 export type CoverageLevel =
   | "local"
@@ -77,7 +82,7 @@ function stripPlace(raw?: string | null): string {
     .trim();
 }
 
-function samePlace(a?: string | null, b?: string | null): boolean {
+export function samePlace(a?: string | null, b?: string | null): boolean {
   const x = stripPlace(a);
   const y = stripPlace(b);
   if (!x || !y) return false;
@@ -331,31 +336,6 @@ export function coverageTone(level: CoverageLevel): string {
     return "border-amber-500/40 bg-amber-500/10 text-amber-800 dark:text-amber-200";
   }
   return "border-border bg-muted/60 text-muted-foreground";
-}
-
-export interface LocalDishSuggestion {
-  city: string;
-  vibe: string;
-  cuisine?: string;
-  items: CityFoodItem[];
-}
-
-export function localTakeoutDishes(
-  city?: string | null,
-  province?: string | null,
-): LocalDishSuggestion | null {
-  const place = resolveTakeoutPlace(city, province);
-  if (!place.city && !place.province) return null;
-  const hit =
-    CITY_FOODS.find((c) => place.city && samePlace(c.city, place.city)) ??
-    CITY_FOODS.find((c) => place.province && samePlace(c.province, place.province));
-  if (!hit) return null;
-  return {
-    city: hit.city,
-    vibe: hit.vibe,
-    cuisine: hit.cuisine,
-    items: hit.items.slice(0, 6),
-  };
 }
 
 export function localHotBrandNames(
